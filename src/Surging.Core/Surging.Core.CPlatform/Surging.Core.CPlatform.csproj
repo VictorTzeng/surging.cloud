@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-     <PackageId>surging</PackageId>
      <Authors>fanly</Authors>
      <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
      <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
