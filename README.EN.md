@@ -132,10 +132,3 @@ Configuring Interceptors
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
 
-IDE:Visual Studio 2017 15.3 Preview ,vscode
-<br/>
-The framework：.NET core 2.0
-<br/>
-如有任何问题可以加入QQ群：542283494 Gitter:not room
-<br/>
-[Blog]:https://www.cnblogs.com/fanliang11

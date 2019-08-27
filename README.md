@@ -46,11 +46,11 @@ nuget:Install-Package surging -Version  版本号
 
 ### 架构图
 
-<img src="https://github.com/dotnetcore/surging/blob/master/docs/Architecture.png" alt="架构图" />
+![./docs/Architecture.png](架构图)
 
 ### 调用链
 
-<img src="https://github.com/dotnetcore/surging/blob/master/docs/call-chain.png" alt="链路图" />
+![./docs/call-chain.png](链路图)
 
 ### 配置：
 
@@ -271,18 +271,6 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
 
-## 捐赠明细
 
-surging 接受来自社区的捐赠，所有款项将通过 [捐赠明细表](Statement-of-Income-and-Expense.md) 进行公示，接受社区监督。
-
-IDE:Visual Studio 2017 15.5,vscode
-<br/>
-框架：.NET core 2.1
-<br/>
-QQ群：615562965
-* [文档](http://docs.dotnet-china.org/surging/)
-* [简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)
-
-## 谁在使用
 
 
