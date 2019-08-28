@@ -1,5 +1,5 @@
 Param(
-  [parameter(Mandatory=$false)][string]$repo="",
+  [parameter(Mandatory=$false)][string]$repo="http://47.95.227.185:8081/repository/nuget-hosted/",
   [parameter(Mandatory=$false)][bool]$push=$false,
   [parameter(Mandatory=$false)][string]$apikey,
   [parameter(Mandatory=$false)][bool]$build=$true
