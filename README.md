@@ -46,11 +46,11 @@ nuget:Install-Package surging -Version  版本号
 
 ### 架构图
 
-![./docs/Architecture.png](架构图)
+![https://code.jingshonline.net/lawfirm-microservices/surging/raw/develop/docs/Architecture.png](架构图)
 
 ### 调用链
 
-![./docs/call-chain.png](链路图)
+![https://code.jingshonline.net/lawfirm-microservices/surging/raw/develop/docs/call-chain.png](链路图)
 
 ### 配置：
 
