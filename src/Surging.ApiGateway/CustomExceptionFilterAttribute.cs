@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Surging.Core.ApiGateWay;
+using Surging.Core.CPlatform.Exceptions;
+using Surging.Core.CPlatform.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,8 +32,10 @@ namespace Surging.ApiGateway
                 return;
             }
             var result =  ServiceResult<object>.Create(false,errorMessage: context.Exception.Message);
-            result.StatusCode = 400;
-            context.Result =new JsonResult(result);
+            result.StatusCode = context.Exception.GetGetExceptionStatusCode();
+            context.Result = new JsonResult(result,new Newtonsoft.Json.JsonSerializerSettings() {
+                
+            });
         }
     }
 }

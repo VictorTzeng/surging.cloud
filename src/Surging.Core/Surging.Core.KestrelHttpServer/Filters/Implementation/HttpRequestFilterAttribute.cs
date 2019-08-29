@@ -10,13 +10,14 @@ using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Autofac;
+using Surging.Core.CPlatform.Exceptions;
 
 namespace Surging.Core.KestrelHttpServer.Filters.Implementation
 {
    public class HttpRequestFilterAttribute : IActionFilter
     {
         internal const string Http405EndpointDisplayName = "405 HTTP Method Not Supported";
-        internal const int Http405EndpointStatusCode = 405;
+        internal const StatusCode Http405EndpointStatusCode = StatusCode.Http405EndpointStatusCode;
         private readonly IServiceRouteProvider _serviceRouteProvider;
         private readonly IServiceEntryLocate _serviceEntryLocate;
         public HttpRequestFilterAttribute()

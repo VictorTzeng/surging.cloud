@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Routing;
@@ -141,8 +142,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             {
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
-                resultMessage.ExceptionMessage = GetExceptionMessage(exception);
-                resultMessage.StatusCode = exception.HResult;
+                resultMessage.ExceptionMessage = exception.GetExceptionMessage();
+                resultMessage.StatusCode = exception.GetGetExceptionStatusCode();
             }
         }
          
@@ -164,18 +165,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             }
         } 
 
-        private static string GetExceptionMessage(Exception exception)
-        {
-            if (exception == null)
-                return string.Empty;
-
-            var message = exception.Message;
-            if (exception.InnerException != null)
-            {
-                message += "|InnerException:" + GetExceptionMessage(exception.InnerException);
-            }
-            return message;
-        }
 
         #endregion Private Method
     }

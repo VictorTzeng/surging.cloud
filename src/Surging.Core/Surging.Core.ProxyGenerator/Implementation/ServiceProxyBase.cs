@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Surging.Core.CPlatform.Utilities;
 using System.Linq;
+using Surging.Core.CPlatform.Exceptions;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -104,10 +105,42 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     result = interceptReuslt.Item2 == null ? default(T) : interceptReuslt.Item2;
                 }
             }
+            //if (message != null)
+            //{
+            //    if (message.Result == null) result = message.Result;
+            //    else  result = _typeConvertibleService.Convert(message.Result, typeof(T));
+            //}
             if (message != null)
             {
-                if (message.Result == null) result = message.Result;
-                else  result = _typeConvertibleService.Convert(message.Result, typeof(T));
+                if (message.StatusCode == StatusCode.Success)
+                {
+                    result = _typeConvertibleService.Convert(message.Result, typeof(T));
+                }
+                else
+                {
+                    switch (message.StatusCode)
+                    {
+                        case StatusCode.BusinessError:
+                            throw new BusinessException(message.ExceptionMessage);
+                        case StatusCode.CommunicationError:
+                            throw new CommunicationException(message.ExceptionMessage);
+                        case StatusCode.RequestError:
+                        case StatusCode.CPlatformError:
+                        case StatusCode.UnKnownError:
+                            throw new CPlatformException(message.ExceptionMessage, message.StatusCode);
+                        case StatusCode.DataAccessError:
+                            throw new DataAccessException(message.ExceptionMessage);
+                        case StatusCode.UnAuthentication:
+                            throw new UnAuthenticationException(message.ExceptionMessage);
+                        case StatusCode.UnAuthorized:
+                            throw new UnAuthorizedException(message.ExceptionMessage);
+                        case StatusCode.UserFriendly:
+                            throw new UserFriendlyException(message.ExceptionMessage);
+                        case StatusCode.ValidateError:
+                            throw new ValidateException(message.ExceptionMessage);
+                    }
+                    throw new CPlatformException(message.ExceptionMessage, message.StatusCode);
+                }
             }
             return (T)result;
         }

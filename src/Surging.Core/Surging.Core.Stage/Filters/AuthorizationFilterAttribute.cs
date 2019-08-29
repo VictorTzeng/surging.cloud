@@ -26,7 +26,7 @@ namespace Surging.Core.Stage.Filters
         {
             var gatewayAppConfig = AppConfig.Options.ApiGetWay;
             if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.DisableNetwork())
-                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.RequestError, Message = "Request error" };
             else
             {
                 if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.EnableAuthorization())
@@ -39,7 +39,7 @@ namespace Surging.Core.Stage.Filters
                             var isSuccess = await _authorizationServerProvider.ValidateClientAuthentication(author);
                             if (!isSuccess)
                             {
-                                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                             }
                             else
                             {
@@ -48,7 +48,7 @@ namespace Surging.Core.Stage.Filters
                             }
                         }
                         else
-                            filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                            filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
 
                     }
                 }

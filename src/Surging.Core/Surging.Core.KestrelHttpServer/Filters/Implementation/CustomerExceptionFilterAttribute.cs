@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Messages;
+﻿using Surging.Core.CPlatform.Exceptions;
+using Surging.Core.CPlatform.Messages;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
             context.Result = new HttpResultMessage<object>
             {
                 Entity = null,
-                StatusCode = 400,
+                StatusCode = context.Exception.GetGetExceptionStatusCode(),
                 IsSucceed = false,
                 Message = context.Exception.Message
             };

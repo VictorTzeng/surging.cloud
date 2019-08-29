@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Surging.Core.ApiGateWay;
 using Surging.Core.ApiGateWay.OAuth;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport.Implementation;
@@ -42,11 +43,11 @@ namespace Surging.Core.Stage.Filters
                 if (token != null)
                 {
                     filterContext.Result = HttpResultMessage<object>.Create(true, token);
-                    filterContext.Result.StatusCode = (int)ServiceStatusCode.Success;
+                    filterContext.Result.StatusCode = StatusCode.Success;
                 }
                 else
                 {
-                    filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                    filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                 }
             }
             else if (filterContext.Route.ServiceDescriptor.AuthType() == AuthorizationType.AppSecret.ToString())
@@ -76,25 +77,25 @@ namespace Surging.Core.Stage.Filters
                     {
                         if (GetMD5($"{route.ServiceDescriptor.Token}{time.ToString("yyyy-MM-dd hh:mm:ss") }") != author.ToString())
                         {
-                            result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                            result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                             isSuccess = false;
                         }
                     }
                     else
                     {
-                        result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                        result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                         isSuccess = false;
                     }
                 }
                 else
                 {
-                    result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                    result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                     isSuccess = false;
                 }
             }
             else
             {
-                result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.RequestError, Message = "Request error" };
                 isSuccess = false;
             }
             return isSuccess;

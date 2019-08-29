@@ -56,12 +56,12 @@ namespace Surging.ApiGateway.Controllers
             var httpMethods = route.ServiceDescriptor.HttpMethod();
             if (!string.IsNullOrEmpty(httpMethods) &&
                 !httpMethods.Contains(Request.Method))
-                return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.Http405Endpoint, Message = "405 HTTP Method Not Supported" };
-            if (!GetAllowRequest(route)) return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                return new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.Http405EndpointStatusCode, Message = "405 HTTP Method Not Supported" };
+            if (!GetAllowRequest(route)) return new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.RequestError, Message = "Request error" };
             if (servicePartProvider.IsPart(path))
             {
                 result = ServiceResult<object>.Create(true, await servicePartProvider.Merge(path, model));
-                result.StatusCode = (int)ServiceStatusCode.Success;
+                result.StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.Success;
             }
             else
             {
@@ -75,11 +75,11 @@ namespace Surging.ApiGateway.Controllers
                         if (token != null)
                         {
                             result = ServiceResult<object>.Create(true, token);
-                            result.StatusCode = (int)ServiceStatusCode.Success;
+                            result.StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.Success;
                         }
                         else
                         {
-                            result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                            result = new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                         }
                     }
                     else
@@ -97,12 +97,12 @@ namespace Surging.ApiGateway.Controllers
                         {
 
                             result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, route.ServiceDescriptor.RoutePath, serviceKey));
-                            result.StatusCode = (int)ServiceStatusCode.Success;
+                            result.StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.Success;
                         }
                         else
                         {
                             result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, route.ServiceDescriptor.RoutePath));
-                            result.StatusCode = (int)ServiceStatusCode.Success;
+                            result.StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.Success;
                         }
                     }
                 }
@@ -146,7 +146,7 @@ namespace Surging.ApiGateway.Controllers
                 isSuccess =await _authorizationServerProvider.ValidateClientAuthentication(author);
                 if (!isSuccess)
                 {
-                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                 }
                 else
                 {
@@ -167,7 +167,7 @@ namespace Surging.ApiGateway.Controllers
             }
             else
             {
-                result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                result = new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.RequestError, Message = "Request error" };
                 isSuccess = false;
             }
             return  (isSuccess,result);
@@ -191,25 +191,25 @@ namespace Surging.ApiGateway.Controllers
                     {
                         if (GetMD5($"{route.ServiceDescriptor.Token}{time.ToString("yyyy-MM-dd hh:mm:ss") }") != author.ToString())
                         {
-                            result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                            result = new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                             isSuccess = false;
                         }
                     }
                     else
                     {
-                        result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                        result = new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.RequestError, Message = "Invalid authentication credentials" };
                         isSuccess = false;
                     }
                 }
                 else
                 {
-                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
                     isSuccess = false;
                 }
             }
             else
             {
-                result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                result = new ServiceResult<object> { IsSucceed = false, StatusCode = Surging.Core.CPlatform.Exceptions.StatusCode.RequestError, Message = "Request error" };
                 isSuccess = false;
             }
             return isSuccess;

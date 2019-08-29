@@ -33,7 +33,7 @@ namespace Surging.Core.Stage.Filters
             RpcContext.GetContext().SetAttachment("RemoteIpAddress", address.ToString());
             if (_ipChecker.IsBlackIp(address,filterContext.Message.RoutePath))
             {
-                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Your IP address is not allowed" };
+                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Your IP address is not allowed" };
             }
              return Task.CompletedTask;
         }

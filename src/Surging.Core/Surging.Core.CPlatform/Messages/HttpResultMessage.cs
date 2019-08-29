@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -91,7 +92,7 @@ namespace Surging.Core.CPlatform.Messages
         /// <summary>
         /// 状态码
         /// </summary>
-        public int StatusCode { get; set; }
+        public StatusCode StatusCode { get; set; }
     }
 }
  
