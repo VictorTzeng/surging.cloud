@@ -8,7 +8,7 @@
     "Token": "true",
     "Libuv": true,
     "Protocol": "${Protocol}|Tcp", //Http¡¢Tcp¡¢None
-    "RootPath": "${RootPath}|d:\\microsurging",
+    "RootPath": "${RootPath}|c:\\microsurging",
     "Ports": {
       "HttpPort": "${HttpPort}|180"
     },
@@ -29,8 +29,8 @@
   },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",
-    "EventBusUserName": "guest",
-    "EventBusPassword": "guest",
+    "EventBusUserName": "rabbitmq",
+    "EventBusPassword": "rabbitmq",
     "VirtualHost": "/",
     "BrokerName": "surging_demo",
     "Port": "5672"

@@ -13,8 +13,8 @@
     "DisconnTimeInterval": 30,
     "ExecutionTimeoutInMilliseconds": 1000,
     "Protocol": "${Protocol}|None", //Http、Tcp、None
-    "RootPath": "${RootPath}|D:\\userapp",
-    "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
+    "RootPath": "${RootPath}|c:\\userapp",
+    "WebRootPath": "${WebRootPath}|c:\\UserApp\\wwwroot",
     "IsModulePerLifetimeScope": false,
     "ReloadOnChange": false,
     "Ports": {
@@ -119,9 +119,9 @@
     }
   },
   "EventBus": {
-    "EventBusConnection": "${EventBusConnection}|localhost",
-    "EventBusUserName": "${EventBusUserName}|guest",
-    "EventBusPassword": "${EventBusPassword}|guest",
+    "EventBusConnection": "${EventBusConnection}|127.0.0.1",
+    "EventBusUserName": "${EventBusUserName}|rabbitmq",
+    "EventBusPassword": "${EventBusPassword}|rabbitmq",
     "VirtualHost": "${VirtualHost}|/",
     "MessageTTL": "${MessageTTL}|30000",
     "RetryCount": "${RetryCount}|1",
