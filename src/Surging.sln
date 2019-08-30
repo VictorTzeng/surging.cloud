@@ -101,6 +101,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.WebSocketCore", "We
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "..\docker-compose\servers\docker-compose.dcproj", "{FEA0C318-FFED-4D39-8781-265718CA43DD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".env", ".env", "{90080480-BF74-4493-8999-4C2D52AB42E6}"
+	ProjectSection(SolutionItems) = preProject
+		..\docker-compose\servers\.env = ..\docker-compose\servers\.env
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".configs", ".configs", "{7873DD55-BF65-4ABB-B2A3-3C5E91D61C65}"
+	ProjectSection(SolutionItems) = preProject
+		Shared\configs\cacheSettings.json = Shared\configs\cacheSettings.json
+		Shared\configs\eventBusSettings.json = Shared\configs\eventBusSettings.json
+		Shared\configs\surgingSettings.json = Shared\configs\surgingSettings.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

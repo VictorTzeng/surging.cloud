@@ -74,7 +74,7 @@ namespace Surging.Services.Client
         /// <param name="serviceProxyFactory"></param>
         public static void Test(IServiceProxyFactory serviceProxyFactory)
         {
-            var  tracingContext =  ServiceLocator.GetService<ITracingContext>();
+        //    var  tracingContext =  ServiceLocator.GetService<ITracingContext>();
             Task.Run(async () =>
             {
                 RpcContext.GetContext().SetAttachment("xid",124);

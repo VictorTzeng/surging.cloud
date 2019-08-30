@@ -55,7 +55,7 @@ namespace Surging.Services.Client
 #if DEBUG
                     build.AddCacheFile("${cachePath}|/app/configs/cacheSettings.json", optional: false, reloadOnChange: true);
                     build.AddCPlatformFile("${surgingPath}|/app/configs/surgingSettings.json", optional: false, reloadOnChange: true);
-                    build.AddEventBusFile("${eventBusPath}|/app/configs/eventBusSettings.json", optional: false);
+                    // build.AddEventBusFile("${eventBusPath}|/app/configs/eventBusSettings.json", optional: false);
 
 
 #else
