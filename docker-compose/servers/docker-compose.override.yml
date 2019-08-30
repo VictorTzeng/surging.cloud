@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  surging.sample.server:
+    environment:
+      Register_Conn: ${REGISTER_CONN:-consul:8500}
+      Register_SessionTimeout: ${REGISTER_SESSION_TIMEOUT:-50}
+      UseEngineParts: ${NORMAL_SERVER_ENGINE}
+      EventBusConnection: ${RABBITMQ_CONNECTION:-rabbitmq}
+      EventBusUserName:  ${RABBITMQ_USERNAME:-rabbitmq}
+      EventBusPassword:  ${RABBITMQ_PASSWORD:-rabbitmq}
+      EventBusPort: ${RABBITMQ_PORT:-5672}
+      Environment: ${ENVIRONMENT:-Development}
+      ForceDisplayStackTrace: ${FORCED_DISPLAY_STACKTRACE:-false}
+      SwaggerTitle: "surging.sample.server"
+      SwaggerDes: "server api docs"
+      SupportName: "liuhongliang"
+      SupportEmail: "liuhongliang@jingshonline.com"
+      EnableAuthorization: ${ENABLE_AUTHORIZATION:-false}
+    ports:
+      - "18083:8080"
+
+  surging.sample.client:
+    environment:
+      Register_Conn: ${REGISTER_CONN:-consul:8500}
+      Register_SessionTimeout: ${REGISTER_SESSION_TIMEOUT:-50}
+      UseEngineParts: ${NORMAL_SERVER_ENGINE}
+      EventBusConnection: ${RABBITMQ_CONNECTION:-hero.rabbitmq}
+      EventBusUserName:  ${RABBITMQ_USERNAME:-rabbitmq}
+      EventBusPassword:  ${RABBITMQ_PASSWORD:-rabbitmq}
+      EventBusPort: ${RABBITMQ_PORT:-5672}
+      ForceDisplayStackTrace: ${FORCED_DISPLAY_STACKTRACE:-false}
+      SwaggerTitle: "surging.sample.client"
+      SwaggerDes: "surging.sample.client相关API文档"
+      SupportName: "liuhongliang"
+      SupportEmail: "liuhongliang@jingshonline.com"
+      EnableAuthorization: ${ENABLE_AUTHORIZATION:-false}
+    ports:
+      - "18084:8080" 

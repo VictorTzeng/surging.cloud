@@ -2,10 +2,7 @@
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Surging.Apm.Skywalking.Abstractions.Common.Tracing;
-using Surging.Apm.Skywalking.Abstractions.Tracing;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Transport.Implementation;

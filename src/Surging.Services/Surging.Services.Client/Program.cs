@@ -51,12 +51,19 @@ namespace Surging.Services.Client
                     logger.AddConfiguration(
                         Core.CPlatform.AppConfig.GetSection("Logging"));
                 })
-                .Configure(build =>
-                build.AddEventBusFile("eventBusSettings.json", optional: false))
-                .Configure(build =>
-                build.AddCacheFile("cacheSettings.json", optional: false, reloadOnChange: true))
-                .Configure(build =>
-                build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
+                .Configure(build => {
+#if DEBUG
+                    build.AddCacheFile("${cachePath}|/app/configs/cacheSettings.json", optional: false, reloadOnChange: true);
+                    build.AddCPlatformFile("${surgingPath}|/app/configs/surgingSettings.json", optional: false, reloadOnChange: true);
+                    build.AddEventBusFile("${eventBusPath}|/app/configs/eventBusSettings.json", optional: false);
+
+
+#else
+                    build.AddCacheFile("${cachePath}|configs/cacheSettings.json", optional: false, reloadOnChange: true);                      
+                    build.AddCPlatformFile("${surgingPath}|configs/surgingSettings.json", optional: false,reloadOnChange: true);                    
+                    build.AddEventBusFile("configs/eventBusSettings.json", optional: false);
+#endif
+                })
                 .UseClient()
                 .UseProxy()
                 .UseStartup<Startup>()

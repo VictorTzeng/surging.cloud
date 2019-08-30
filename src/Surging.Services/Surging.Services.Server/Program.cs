@@ -51,9 +51,17 @@ namespace Surging.Services.Server
                 .UseServer(options =>{ })
                 .UseConsoleLifetime()
                 .Configure(build =>
-                build.AddCacheFile("${cachepath}|cacheSettings.json",basePath:AppContext.BaseDirectory, optional: false, reloadOnChange: true))
-                  .Configure(build =>
-                build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
+                {
+
+#if DEBUG
+                    build.AddCacheFile("${cachePath}|/app/configs/cacheSettings.json", optional: false, reloadOnChange: true);
+                    build.AddCPlatformFile("${surgingPath}|/app/configs/surgingSettings.json", optional: false, reloadOnChange: true);
+
+#else
+                 build.AddCacheFile("${cachepath}|cacheSettings.json", basePath: AppContext.BaseDirectory, optional: false, reloadOnChange: true);
+                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true);
+#endif
+                })
                 .UseStartup<Startup>()
                 .Build();
 

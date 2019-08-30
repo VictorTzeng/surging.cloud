@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Surging.Apm\Surging.Apm.Skywalking\Surging.Apm.Skywalking.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Abp\Surging.Core.Abp.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ApiGateWay\Surging.Core.ApiGateWay.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Caching\Surging.Core.Caching.csproj" />

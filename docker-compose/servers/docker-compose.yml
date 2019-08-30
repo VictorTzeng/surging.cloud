@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  surging.sample.server:
+    image: jingshonlinesample/surging.sample.server:${TAG:-latest}
+    build:
+      context: ../..
+      dockerfile: src/Surging.Services/Surging.Services.Server/Dockerfile
+      args:
+        host_workdir: src/Surging.Services/Surging.Services.Server
+        host_name: Surging.Services.Server.dll
+        sln_name:  src/Surging.sln
+    volumes:
+      - ${LOG_DIR:-/var/logs}/auth:/app/logs
+    networks:
+      - surging_sample_service_net
+
+  surging.sample.client:
+    image: jingshonlinesample/surging.sample.client:${TAG:-latest}
+    build:
+      context: ../..
+      dockerfile: src/Surging.Services/Surging.Services.Client/Dockerfile
+      args:
+        host_workdir: src/Surging.Services/Surging.Services.Client
+        host_name: Surging.Services.Client.dll
+        sln_name:  src/Surging.sln
+    volumes:
+      - ${LOG_DIR:-/var/logs}/basicdata:/app/logs
+    networks:
+      - surging_sample_service_net
+
+networks:
+  surging_sample_service_net: 
+    external:
+      name: surging_sample_service_net
