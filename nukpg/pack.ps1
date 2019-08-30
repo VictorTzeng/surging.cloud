@@ -41,9 +41,18 @@ if ($build) {
       Pack -projectFolder (Join-Path $srcPath $project)
     }    
   }
-  $dotnettyCodecDns = Join-Path $slnPath "src/DotNetty/DotNetty.Codecs.DNS" 
+  $dotnettyCodecDns = Join-Path $slnPath "DotNetty.Codecs/DotNetty.Codecs.DNS" 
   Pack -projectFolder $dotnettyCodecDns -projectName "DotNetty.Codecs.DNS"
 
+
+  $skyApmTransportGrpcProtocol = Join-Path $slnPath "Surging.Apm/SkyApm.Transport.Grpc.Protocol"
+  Pack -projectFolder $skyApmTransportGrpcProtocol -projectName "SkyApm.Transport.Grpc.Protocol"
+
+  $surgingSkywalking = Join-Path $slnPath "Surging.Apm/Surging.Apm.Skywalking"
+  Pack -projectFolder $surgingSkywalking -projectName "Surging.Apm.Skywalking"
+  
+  $surgingWebSocektCore = Join-Path $slnPath "WebSocket/Surging.WebSocketCore"
+  Pack -projectFolder $surgingWebSocektCore -projectName "Surging.WebSocketCore"
   Set-Location $packFolder
 }
 
