@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Surging.Core.CPlatform;
+using Surging.Core.Domain.PagedAndSorted;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -174,7 +175,8 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     UsingDirective(GetQualifiedNameSyntax(typeof(IRemoteInvokeService).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(CPlatformContainer).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
-                    UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace))
+                    UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(IPagedResult<>).Namespace))
                 }.Concat(directives));
         }
 
