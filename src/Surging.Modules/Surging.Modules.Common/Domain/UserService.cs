@@ -164,6 +164,11 @@ namespace Surging.Modules.Common.Domain
         {
             return await Task.FromResult(sex);
         }
+
+        public async Task<DeleteByIdOutput> Delete(DeleteByIdInput input)
+        {
+            return new DeleteByIdOutput  { Id = Guid.NewGuid().ToString(), Message = "删除成功" };
+        }
         #endregion Implementation of IUserService
     }
 }

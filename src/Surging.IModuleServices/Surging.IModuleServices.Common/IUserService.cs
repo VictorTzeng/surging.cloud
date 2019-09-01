@@ -177,5 +177,8 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// </summary>
         /// <returns></returns>
         Task<Dictionary<string, object>> GetAllThings();
+
+        [HttpDelete(true)]
+        Task<DeleteByIdOutput> Delete(DeleteByIdInput input);
     }
 }

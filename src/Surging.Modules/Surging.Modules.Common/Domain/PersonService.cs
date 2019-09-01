@@ -165,6 +165,11 @@ namespace Surging.Modules.Common.Domain
             return await Task.FromResult(new Dictionary<string, object> { { "aaa", 12 } });
         }
 
+        public Task<DeleteByIdOutput> Delete(DeleteByIdInput input)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion Implementation of IUserService
     }
 }
