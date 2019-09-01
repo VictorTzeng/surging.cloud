@@ -95,7 +95,7 @@ namespace Surging.Core.KestrelHttpServer
             {
                 StreamReader streamReader = new StreamReader(context.Request.Body);
                 var data = await streamReader.ReadToEndAsync();
-                if (context.Request.Method == "POST")
+                if (context.Request.Method != "GET")
                 {
                     var bodyParams = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
                     foreach (var param in bodyParams)
