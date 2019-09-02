@@ -186,20 +186,38 @@ namespace Surging.Core.Consul
                 var writeResult = await client.KV.Get(key);
                 if (writeResult.Response != null)
                 {
-                    var distributedLock = await client.AcquireLock(key);
-                    result.Add(distributedLock);
+                    try
+                    {
+                        var distributedLock = await client.AcquireLock(key);
+                        result.Add(distributedLock);
+                    } catch (Exception ex) {
+                        if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug)) {
+                            _logger.LogDebug($"新增consul lock:{key}失败",ex);
+                        }
+                    }
+                   
+                  
                 }
                 else
                 {
-                    var distributedLock = await client.AcquireLock(new LockOptions($"lock_{_configInfo.RoutePath}")
+                    try
                     {
-                        SessionTTL = TimeSpan.FromSeconds(_configInfo.LockDelay),
-                        LockTryOnce = true,
-                        LockWaitTime = TimeSpan.FromSeconds(_configInfo.LockDelay)
-                    }, _configInfo.LockDelay == 0 ?
-                        default :
-                         new CancellationTokenSource(TimeSpan.FromSeconds(_configInfo.LockDelay)).Token);
-                    result.Add(distributedLock);
+                        var distributedLock = await client.AcquireLock(new LockOptions($"lock_{_configInfo.RoutePath}")
+                        {
+                            SessionTTL = TimeSpan.FromSeconds(_configInfo.LockDelay),
+                            LockTryOnce = true,
+                            LockWaitTime = TimeSpan.FromSeconds(_configInfo.LockDelay)
+                        }, _configInfo.LockDelay == 0 ?
+                      default :
+                       new CancellationTokenSource(TimeSpan.FromSeconds(_configInfo.LockDelay)).Token);
+                        result.Add(distributedLock);
+                    } catch (Exception ex) {
+                        if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                        {
+                            _logger.LogDebug($"新增consul lock:{key}失败", ex);
+                        }
+                    }
+                  
                 }
 
             }
