@@ -48,7 +48,7 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
             }
             else
             {
-                var serviceRoute = await _serviceRouteProvider.GetRouteByPath(filterContext.Message.RoutePath);
+                var serviceRoute = await _serviceRouteProvider.GetLocalRouteByPathRegex(filterContext.Message.RoutePath);
                 var httpMethods = serviceRoute.ServiceDescriptor.HttpMethod();
                 if (!string.IsNullOrEmpty(httpMethods) && !httpMethods.Contains(filterContext.Context.Request.Method))
                 {
