@@ -10,6 +10,7 @@ using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Mqtt.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Serialization;
+using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
@@ -255,7 +256,7 @@ namespace Surging.Core.Consul
 
         private async Task EnterRoutes()
         {
-            if (_routes != null && _routes.Length > 0)
+            if (_routes != null && _routes.Length > 0 && !(await IsNeedUpdateRoutes(_routes.Length)))
                 return;
             Action<string[]> action = null;
             var client =await GetConsulClient();
@@ -281,7 +282,18 @@ namespace Surging.Core.Consul
                 _routes = new MqttServiceRoute[0];
             }
         }
-         
+
+        private async Task<bool> IsNeedUpdateRoutes(int routeCount)
+        {
+            var commmadManager = ServiceLocator.GetService<IServiceCommandManager>();
+            var commands = commmadManager.GetServiceCommandsAsync().Result;
+            if (commands != null && commands.Any() && commands.Count() <= routeCount)
+            {
+                return false;
+            }
+            return true;
+        }
+
 
         private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
         {

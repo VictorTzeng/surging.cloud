@@ -58,13 +58,13 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
-        public  ValueTask<ServiceRoute> GetLocalRouteByPathRegex(string path)
+        public ValueTask<ServiceRoute> GetLocalRouteByPathRegex(string path)
         {
             var addess = NetUtils.GetHostAddress();
 
             if (_localRoutes.Count == 0)
             {
-                _localRoutes.AddRange( _serviceEntryManager.GetEntries().Select(i =>
+                _localRoutes.AddRange(_serviceEntryManager.GetEntries().Select(i =>
                 {
                     i.Descriptor.Token = _serviceTokenGenerator.GetToken();
                     return new ServiceRoute
@@ -107,7 +107,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             if (route == null)
             {
                 var routes = await _serviceRouteManager.GetRoutesAsync();
-                return await GetRouteByPathRegexAsync(routes,path);
+                return await GetRouteByPathRegexAsync(routes, path);
             }
             else
             {
@@ -121,7 +121,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         }
 
         public async Task RegisterRoutes(decimal processorTime)
-        {  
+        {
             var addess = NetUtils.GetHostAddress();
             addess.ProcessorTime = processorTime;
             RpcContext.GetContext().SetAttachment("Host", addess);
@@ -134,7 +134,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                     ServiceDescriptor = i.Descriptor
                 };
             }).ToList();
-           await  _serviceRouteManager.SetRoutesAsync(addressDescriptors);
+            await _serviceRouteManager.SetRoutesAsync(addressDescriptors);
         }
 
         #region 私有方法
@@ -187,14 +187,14 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         }
 
         private async Task<ServiceRoute> GetRouteByPathRegexAsync(IEnumerable<ServiceRoute> routes, string path)
-        { 
+        {
             var pattern = "/{.*?}";
 
-           var route = routes.FirstOrDefault(i =>
+            var route = routes.FirstOrDefault(i =>
             {
                 var routePath = Regex.Replace(i.ServiceDescriptor.RoutePath, pattern, "");
                 var newPath = path.Replace(routePath, "");
-                return (newPath.StartsWith("/")|| newPath.Length==0) && i.ServiceDescriptor.RoutePath.Split("/").Length == path.Split("/").Length && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload");
+                return (newPath.StartsWith("/") || newPath.Length == 0) && i.ServiceDescriptor.RoutePath.Split("/").Length == path.Split("/").Length && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload");
             });
 
 
@@ -204,8 +204,8 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                     _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
             }
             else
-              if(!Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern))  _serviceRoute.GetOrAdd(path, route);
-            return await Task.FromResult(route);
+              if (!Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern)) _serviceRoute.GetOrAdd(path, route);
+            return route;
         }
 
         #endregion
