@@ -57,8 +57,8 @@ namespace Surging.ApiGateway
             services.AddMvc(options => {
                 options.Filters.Add(typeof(CustomExceptionFilterAttribute));
             }).AddJsonOptions(options => {
-                options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                //options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                //options.SerializerSettings.ContractResolver = new DefaultContractResolver();
             });
             services.AddLogging();
             services.AddCors();
@@ -87,7 +87,7 @@ namespace Surging.ApiGateway
         
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
+            //loggerFactory.AddConsole();
             var serviceCacheProvider = ServiceLocator.Current.Resolve<ICacheNodeProvider>();
             var addressDescriptors = serviceCacheProvider.GetServiceCaches().ToList();
             ServiceLocator.Current.Resolve<IServiceProxyFactory>();
