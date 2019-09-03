@@ -7,7 +7,7 @@
         <AssemblyName>SkyApm.Transport.Grpc.Protocol</AssemblyName>
         <PackageId>SkyApm.Transport.Grpc.Protocol</PackageId>
         <PackageTags>SkyWalking;Grpc</PackageTags>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
         <RootNamespace>SkyApm.Transport.Grpc.Protocol</RootNamespace>
     </PropertyGroup>
 
