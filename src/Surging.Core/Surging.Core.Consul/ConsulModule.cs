@@ -167,37 +167,37 @@ namespace Surging.Core.Consul
 
         public ContainerBuilderWrapper UseSubscribeManager(ContainerBuilderWrapper builder, Func<IServiceProvider, IServiceSubscribeManager> factory)
         {
-            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
         public ContainerBuilderWrapper UseCommandManager(ContainerBuilderWrapper builder, Func<IServiceProvider, IServiceCommandManager> factory)
         {
-            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
         public ContainerBuilderWrapper UseCacheManager(ContainerBuilderWrapper builder, Func<IServiceProvider, IServiceCacheManager> factory)
         {
-            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
         public ContainerBuilderWrapper UseRouteManager(ContainerBuilderWrapper builder, Func<IServiceProvider, IServiceRouteManager> factory)
         {
-            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
         public ContainerBuilderWrapper UseMqttRouteManager(ContainerBuilderWrapper builder, Func<IServiceProvider, IMqttServiceRouteManager> factory)
         {
-            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
         public ContainerBuilderWrapper UseCounlClientProvider(ContainerBuilderWrapper builder, Func<IServiceProvider, IConsulClientProvider> factory)
         {
-            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 

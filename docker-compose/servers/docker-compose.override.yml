@@ -18,7 +18,7 @@ services:
       SupportEmail: "liuhongliang@jingshonline.com"
       EnableAuthorization: ${ENABLE_AUTHORIZATION:-false}
     ports:
-      - "18083:8080"
+      - "18088:8080"
 
   surging.sample.client:
     environment:

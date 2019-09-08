@@ -123,7 +123,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseRouteManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceRouteManager> factory)
         {
-            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.Services.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
@@ -135,7 +135,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseSubscribeManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceSubscribeManager> factory)
         {
-            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.Services.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
@@ -147,7 +147,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseCommandManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceCommandManager> factory)
         {
-            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.Services.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
@@ -159,7 +159,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseCacheManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceCacheManager> factory)
         {
-            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.Services.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 
@@ -183,7 +183,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseMqttRouteManager(this IServiceBuilder builder, Func<IServiceProvider, IMqttServiceRouteManager> factory)
         {
-            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            builder.Services.RegisterAdapter(factory).SingleInstance();
             return builder;
         }
 

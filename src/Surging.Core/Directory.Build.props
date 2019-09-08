@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <Version>2.0.1-bate.1</Version>
+    <Version>2.0.1-bate.2</Version>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageIconUrl>https://raw.githubusercontent.com/surging-cloud/surging/develop/logo.jpg</PackageIconUrl>
     <PackageProjectUrl>https://github.com/surging-cloud/surging</PackageProjectUrl>
@@ -10,7 +10,7 @@
 	  <Company>Surging Cloud</Company>
 	  <Authors>Surging Cloud</Authors>
     <Product>Surging Micro Service Framework</Product>
-    <Copyright>Copyright © Jingshonline All Rights Reserved.</Copyright>
+    <Copyright>Copyright © surging-cloud All Rights Reserved.</Copyright>
 	  <PackageTags>surging;microservice</PackageTags>
   </PropertyGroup>
 
