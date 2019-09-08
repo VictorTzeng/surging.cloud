@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Surging.Core.Domain.PagedAndSorted
+namespace Surging.Core.Domain
 {
     public class ListResultDto<T> : IListResult<T>
     {

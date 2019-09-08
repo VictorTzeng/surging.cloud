@@ -49,6 +49,11 @@ namespace Surging.Core.CPlatform.Module
                 }
                 catch(Exception ex)
                 {
+                    if (_logger.IsEnabled(LogLevel.Error))
+                    {
+                        _logger.LogError(ex.Message, ex);
+                    }
+                       
                     throw ex;
                 }
             });

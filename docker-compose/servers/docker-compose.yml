@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   surging.sample.server:
-    image: jingshonlinesample/surging.sample.server:${TAG:-latest}
+    image: surging/surging.sample.server:${TAG:-latest}
     build:
       context: ../..
       dockerfile: src/Surging.Services/Surging.Services.Server/Dockerfile
@@ -16,7 +16,7 @@ services:
       - surging_sample_service_net
 
   surging.sample.client:
-    image: jingshonlinesample/surging.sample.client:${TAG:-latest}
+    image: surging/surging.sample.client:${TAG:-latest}
     build:
       context: ../..
       dockerfile: src/Surging.Services/Surging.Services.Client/Dockerfile
@@ -32,4 +32,4 @@ services:
 networks:
   surging_sample_service_net: 
     external:
-      name: surging_sample_service_net
+      name: surging_hero_service_net
