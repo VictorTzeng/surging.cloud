@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>$(PackagePrefix).AutoMapper</PackageId>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>通过AutoMapper组件实现Dto对象和实体对象之间的相互转换</Description>
 

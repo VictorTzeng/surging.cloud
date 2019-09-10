@@ -4,7 +4,7 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PackageIconUrl>https://raw.githubusercontent.com/surging-cloud/surging/develop/logo.jpg</PackageIconUrl>
     <PackageProjectUrl>https://github.com/surging-cloud/surging</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/surging-cloud/surging/develop/LICENSE</PackageLicenseUrl>
+    <License>https://raw.githubusercontent.com/surging-cloud/surging/develop/LICENSE</License>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/surging-cloud/surging.git</RepositoryUrl>
 	  <Company>Surging Cloud</Company>
@@ -12,6 +12,7 @@
     <Product>Surging Micro Service Framework</Product>
     <Copyright>Copyright © surging-cloud All Rights Reserved.</Copyright>
 	  <PackageTags>surging;microservice</PackageTags>
+    <PackagePrefix>Surging.Cloud</PackagePrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release' ">

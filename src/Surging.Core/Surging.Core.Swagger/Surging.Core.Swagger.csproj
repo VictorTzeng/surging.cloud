@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>$(PackagePrefix).Swagger</PackageId>
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 

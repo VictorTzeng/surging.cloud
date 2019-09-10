@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>$(PackagePrefix).CPlatform</PackageId>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-     <PackageReleaseNotes>1.multiple register center cluster
+    <PackageReleaseNotes>1.multiple register center cluster
 2. fix bug</PackageReleaseNotes>
   </PropertyGroup>
 

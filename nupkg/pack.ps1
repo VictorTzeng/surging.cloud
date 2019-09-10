@@ -1,5 +1,5 @@
 Param(
-  [parameter(Mandatory=$false)][string]$repo="http://47.95.227.185:8081/repository/nuget-hosted/",
+  [parameter(Mandatory=$false)][string]$repo="https://api.nuget.org/v3/index.json",
   [parameter(Mandatory=$false)][bool]$push=$false,
   [parameter(Mandatory=$false)][string]$apikey,
   [parameter(Mandatory=$false)][bool]$build=$true
@@ -27,8 +27,10 @@ function Pack($projectFolder,$projectName) {
    if ($projectName) {
     $projectPackPath = Join-Path $projectFolder ("/bin/Release/" + $projectName + ".*.nupkg")
    }else {
-    $projectPackPath = Join-Path $projectFolder ("/bin/Release/" + $project + ".*.nupkg")
+    $projectName = $project -replace "Core","Cloud"
+    $projectPackPath = Join-Path $projectFolder ("/bin/Release/" + $projectName + ".*.nupkg")
    }
+
    Move-Item -Force $projectPackPath $packFolder 
 }
 
@@ -42,17 +44,17 @@ if ($build) {
     }    
   }
   $dotnettyCodecDns = Join-Path $slnPath "DotNetty.Codecs/DotNetty.Codecs.DNS" 
-  Pack -projectFolder $dotnettyCodecDns -projectName "DotNetty.Codecs.DNS"
+  Pack -projectFolder $dotnettyCodecDns -projectName "Surging.Cloud.DotNetty.Codecs.DNS"
 
 
   $skyApmTransportGrpcProtocol = Join-Path $slnPath "Surging.Apm/SkyApm.Transport.Grpc.Protocol"
-  Pack -projectFolder $skyApmTransportGrpcProtocol -projectName "SkyApm.Transport.Grpc.Protocol"
+  Pack -projectFolder $skyApmTransportGrpcProtocol -projectName "Surging.Cloud.SkyApm.Transport.Grpc.Protocol"
 
   $surgingSkywalking = Join-Path $slnPath "Surging.Apm/Surging.Apm.Skywalking"
-  Pack -projectFolder $surgingSkywalking -projectName "Surging.Apm.Skywalking"
+  Pack -projectFolder $surgingSkywalking -projectName "Surging.Cloud.Apm.Skywalking"
   
   $surgingWebSocektCore = Join-Path $slnPath "WebSocket/Surging.WebSocketCore"
-  Pack -projectFolder $surgingWebSocektCore -projectName "Surging.WebSocketCore"
+  Pack -projectFolder $surgingWebSocektCore -projectName "Surging.Cloud.WebSocketCore"
   Set-Location $packFolder
 }
 

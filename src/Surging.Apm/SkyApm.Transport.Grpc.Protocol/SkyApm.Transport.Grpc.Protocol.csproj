@@ -2,6 +2,7 @@
 
 
     <PropertyGroup>
+        <PackageId>Surging.Cloud.SkyApm.Transport.Grpc.Protocol</PackageId>
         <Description>$(Product) gRPC data transmitter.</Description>
         <AssemblyTitle>SkyApm.Transport.Grpc.Protocol</AssemblyTitle>
         <AssemblyName>SkyApm.Transport.Grpc.Protocol</AssemblyName>
