@@ -55,7 +55,10 @@ namespace Surging.Core.Swagger
             {
                 serviceCollection.AddSwaggerGen(options =>
                 {
-                    options.OperationFilter<AddAuthorizationOperationFilter>();
+                    if (context.Modules.Any(p => p.ModuleName == "StageModule" && p.Enable))
+                    {
+                        options.OperationFilter<AddAuthorizationOperationFilter>();
+                    }
                     options.SwaggerDoc(info.Version, info);
                     if (swaggerOptions != null && swaggerOptions.IgnoreFullyQualified)
                         options.IgnoreFullyQualified();

@@ -71,11 +71,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 Id = serviceId,
                 RoutePath = RoutePatternParser.Parse(routeTemplate, serviceName, method.Name)
             };
-            var descriptorAttributes = method.GetCustomAttributes<ServiceDescriptorAttribute>();
-            foreach (var descriptorAttribute in descriptorAttributes)
-            {
-                descriptorAttribute.Apply(serviceDescriptor);
-            }
             var httpMethodAttributes = attributes.Where(p => p is HttpMethodAttribute).Select(p => p as HttpMethodAttribute).ToList();
             var httpMethods = new List<string>();
             StringBuilder httpMethod = new StringBuilder();
@@ -97,6 +92,17 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 serviceDescriptor.AuthType(((authorization as AuthorizationAttribute)?.AuthType)
                     ?? AuthorizationType.AppSecret);
+            }
+            else
+            {
+                serviceDescriptor.EnableAuthorization(true);
+                serviceDescriptor.AuthType(AuthorizationType.JWT);
+            }
+
+            var descriptorAttributes = method.GetCustomAttributes<ServiceDescriptorAttribute>();
+            foreach (var descriptorAttribute in descriptorAttributes)
+            {
+                descriptorAttribute.Apply(serviceDescriptor);
             }
             var fastInvoker = GetHandler(serviceId, method);
             return new ServiceEntry

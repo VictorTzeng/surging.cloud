@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Surging.Core.Swagger.Swagger.Filters
 {
-   public class AddAuthorizationOperationFilter : IOperationFilter
+    public class AddAuthorizationOperationFilter : IOperationFilter
     {
 
         public AddAuthorizationOperationFilter()
@@ -25,7 +25,7 @@ namespace Surging.Core.Swagger.Swagger.Filters
             var attribute =
                  context.ServiceEntry.Attributes.Where(p => p is AuthorizationAttribute)
                  .Select(p => p as AuthorizationAttribute).FirstOrDefault();
-            if (attribute != null && attribute.AuthType == AuthorizationType.JWT)
+            if ((attribute != null && attribute.AuthType == AuthorizationType.JWT) || (context.ServiceEntry.Descriptor.GetMetadata<bool>("EnableAuthorization") && context.ServiceEntry.Descriptor.GetMetadata<AuthorizationType>("AuthType") == AuthorizationType.JWT))
             {
                 operation.Parameters.Add(new BodyParameter
                 {
@@ -38,7 +38,7 @@ namespace Surging.Core.Swagger.Swagger.Filters
                     }
                 });
             }
-            else if( attribute != null && attribute.AuthType == AuthorizationType.AppSecret)
+            else if ((attribute != null && attribute.AuthType == AuthorizationType.AppSecret) || (context.ServiceEntry.Descriptor.GetMetadata<bool>("EnableAuthorization") && context.ServiceEntry.Descriptor.GetMetadata<AuthorizationType>("AuthType") == AuthorizationType.AppSecret))
             {
                 operation.Parameters.Add(new BodyParameter
                 {

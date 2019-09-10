@@ -27,6 +27,10 @@
       {
         "TypeName": "EnginePartModule",
         "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;"
+      },
+      {
+        "TypeName": "KestrelHttpModule",
+        "Using": "${UseKestrelHttpParts}|StageModule,SwaggerModule"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -38,7 +42,7 @@
     "EnableChildrenMonitor": false
   },
   "Stage": {
-    "EnableHttps": true, // 不设置ports，默认httpsPort:443
+    "EnableHttps": false, // 不设置ports，默认httpsPort:443
     "CertificateFileName": "${CertificateFileName}|",
     "CertificateLocation": "${CertificateLocation}|pfxs",
     "CertificatePassword": "${CertificatePassword}|",

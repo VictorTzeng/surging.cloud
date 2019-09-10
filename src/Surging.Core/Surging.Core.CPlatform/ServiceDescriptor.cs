@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Surging.Core.CPlatform.Filters.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -177,6 +178,17 @@ namespace Surging.Core.CPlatform
         {
             return descriptor.GetMetadata("WaitExecution", true);
         }
+
+        public static bool AllowPermission(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata("AllowPermission", false);
+        }
+
+        public static ServiceDescriptor AllowPermission(this ServiceDescriptor descriptor, bool allowPermission)
+        {
+            descriptor.Metadatas["AllowPermission"] = allowPermission;
+            return descriptor;
+        }
     }
 
     /// <summary>
@@ -225,7 +237,7 @@ namespace Surging.Core.CPlatform
             if (!Metadatas.ContainsKey(name))
                 return def;
 
-            return (T)Metadatas[name];
+            return Metadatas[name].ConventTo<T>();
         }
 
         #region Equality members

@@ -28,6 +28,7 @@ namespace Surging.IModuleServices.Common
         /// </summary>
         /// <param name="requestData">请求参数</param>
         /// <returns>用户模型</returns>
+        [Service(EnableAuthorization = false)]
         Task<UserModel> Authentication(AuthenticationRequestData requestData);
 
         /// <summary>
