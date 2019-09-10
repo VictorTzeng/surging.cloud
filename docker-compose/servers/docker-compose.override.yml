@@ -6,6 +6,7 @@ services:
       Register_Conn: ${REGISTER_CONN:-consul:8500}
       Register_SessionTimeout: ${REGISTER_SESSION_TIMEOUT:-50}
       UseEngineParts: ${NORMAL_SERVER_ENGINE}
+      UseKestrelHttpParts: ${KESTREL_SERVER_ENGINE}
       EventBusConnection: ${RABBITMQ_CONNECTION:-rabbitmq}
       EventBusUserName:  ${RABBITMQ_USERNAME:-rabbitmq}
       EventBusPassword:  ${RABBITMQ_PASSWORD:-rabbitmq}

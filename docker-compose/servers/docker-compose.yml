@@ -32,4 +32,4 @@ services:
 networks:
   surging_sample_service_net: 
     external:
-      name: surging_hero_service_net
+      name: surging_sample_service_net
