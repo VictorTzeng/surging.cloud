@@ -268,4 +268,5 @@ api/
 _site/
 
 .mysql/
+**/logs/
 
