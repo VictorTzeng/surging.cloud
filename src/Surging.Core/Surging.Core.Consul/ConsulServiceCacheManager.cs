@@ -241,13 +241,17 @@ namespace Surging.Core.Consul
         private async Task<string[]> ConvertPaths(string[] datas)
         {
             List<string> paths = new List<string>();
-            foreach (var data in datas)
+            if (datas != null && datas.Any())
             {
-                var result = await GetCacheData(data);
-                var serviceId = result?.CacheDescriptor.Id;
-                if (!string.IsNullOrEmpty(serviceId))
-                    paths.Add(serviceId);
+                foreach (var data in datas)
+                {
+                    var result = await GetCacheData(data);
+                    var serviceId = result?.CacheDescriptor.Id;
+                    if (!string.IsNullOrEmpty(serviceId))
+                        paths.Add(serviceId);
+                }
             }
+           
             return paths.ToArray();
         }
 
