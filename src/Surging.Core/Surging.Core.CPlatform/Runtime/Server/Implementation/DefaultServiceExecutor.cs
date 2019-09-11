@@ -139,7 +139,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
                 if (remoteInvokeMessage.DecodeJOject && !(resultMessage.Result is IConvertible && UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(resultMessage.Result.GetType())))
                 {
-                    resultMessage.Result = _serializer.Serialize(resultMessage.Result);  //JsonConvert.SerializeObject(resultMessage.Result);
+                    resultMessage.Result = _serializer.Deserialize(resultMessage.Result.ToString(),typeof(object));  //_serializer.Serialize(resultMessage.Result);  //JsonConvert.SerializeObject(resultMessage.Result);
                 }
             }
             catch (Exception exception)
