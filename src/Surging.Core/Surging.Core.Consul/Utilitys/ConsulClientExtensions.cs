@@ -13,34 +13,19 @@ namespace Surging.Core.Consul.Utilitys
     {
         public static async Task<string[]> GetChildrenAsync(this ConsulClient client, string path)
         {
-            var policy = Policy.Handle<HttpRequestException>().WaitAndRetry(5, i => TimeSpan.FromMilliseconds(1000));
+            return Policy.Handle<Exception>().WaitAndRetry(5, i => TimeSpan.FromMilliseconds(5000)).Execute<string[]>(() => {
+                var queryResult = client.KV.List(path).Result;
+                return queryResult.Response?.Select(p => Encoding.UTF8.GetString(p.Value)).ToArray();
+            });
 
-            try
-            {
-                return policy.Execute<string[]>(() => {
-                    var queryResult = client.KV.List(path).Result;
-                    return queryResult.Response?.Select(p => Encoding.UTF8.GetString(p.Value)).ToArray();
-                });
-            } catch (HttpRequestException) {
-                return null;
-            }
-            
         }
 
         public static async Task<byte[]> GetDataAsync(this ConsulClient client, string path)
         {
-            var policy = Policy.Handle<HttpRequestException>().WaitAndRetry(5, i => TimeSpan.FromMilliseconds(1000));
-            try
-            {
-                return policy.Execute<byte[]>(() => {
-                    var queryResult = client.KV.Get(path).Result;
-                    return queryResult.Response?.Value;
-                });               
-            }
-            catch (HttpRequestException)
-            {
-                return null;
-            }
+            return Policy.Handle<Exception>().WaitAndRetry(5, i => TimeSpan.FromMilliseconds(5000)).Execute<byte[]>(() => {
+                var queryResult = client.KV.Get(path).Result;
+                return queryResult.Response?.Value;
+            });
         }
     }
 }
