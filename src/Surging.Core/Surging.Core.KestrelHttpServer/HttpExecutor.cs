@@ -21,6 +21,7 @@ using System.Diagnostics;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Exceptions;
+using Surging.Core.CPlatform.Serialization;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -36,13 +37,18 @@ namespace Surging.Core.KestrelHttpServer
         private readonly IServiceProxyProvider _serviceProxyProvider;
         private readonly ConcurrentDictionary<string, ValueTuple<FastInvokeHandler, object, MethodInfo>> _concurrent =
         new ConcurrentDictionary<string, ValueTuple<FastInvokeHandler, object, MethodInfo>>();
+        private readonly ISerializer<string> _serializer;
         #endregion Field
 
         #region Constructor
 
         public HttpExecutor(IServiceEntryLocate serviceEntryLocate, IServiceRouteProvider serviceRouteProvider,
             IAuthorizationFilter authorizationFilter,
-            ILogger<HttpExecutor> logger, CPlatformContainer serviceProvider, IServiceProxyProvider serviceProxyProvider, ITypeConvertibleService typeConvertibleService)
+            ILogger<HttpExecutor> logger,
+            CPlatformContainer serviceProvider,
+            IServiceProxyProvider serviceProxyProvider,
+            ITypeConvertibleService typeConvertibleService,
+            ISerializer<string> serializer)
         {
             _serviceEntryLocate = serviceEntryLocate;
             _logger = logger;
@@ -51,6 +57,7 @@ namespace Surging.Core.KestrelHttpServer
             _serviceRouteProvider = serviceRouteProvider;
             _authorizationFilter = authorizationFilter;
             _serviceProxyProvider = serviceProxyProvider;
+            _serializer = serializer;
         }
         #endregion Constructor
 
@@ -104,7 +111,8 @@ namespace Surging.Core.KestrelHttpServer
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
             try {
-                resultMessage.Entity = await _serviceProxyProvider.Invoke<object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
+                var resultData = await _serviceProxyProvider.Invoke<object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
+                resultMessage.Entity = HandleResultData(resultData);
                 resultMessage.IsSucceed = resultMessage.Entity != default;
                 resultMessage.StatusCode = resultMessage.IsSucceed ? StatusCode.Success : StatusCode.RequestError;
             }
@@ -115,6 +123,19 @@ namespace Surging.Core.KestrelHttpServer
                 resultMessage = new HttpResultMessage<object> { Entity = null, Message = ex.GetExceptionMessage(), StatusCode = ex.GetGetExceptionStatusCode() };
             }
             return resultMessage;
+        }
+
+        private object HandleResultData(object resultData)
+        {
+            if (resultData.GetType() == typeof(string)) {
+                var resultDataStr = (string)resultData;
+                if (resultDataStr.IsValidJson()) {
+                    var dataObj = _serializer.Deserialize(resultDataStr, typeof(object), true);
+                    return dataObj;
+                }
+                return resultDataStr;
+            }
+            return resultData;
         }
 
         private async Task<HttpResultMessage<object>> LocalExecuteAsync(ServiceEntry entry, HttpMessage httpMessage)
