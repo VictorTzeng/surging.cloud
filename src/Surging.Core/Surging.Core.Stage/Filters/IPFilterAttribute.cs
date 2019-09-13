@@ -22,20 +22,20 @@ namespace Surging.Core.Stage.Filters
             _httpContextAccessor = httpContextAccessor;
             _ipChecker = ipChecker;
         }
-        public  Task OnActionExecuted(ActionExecutedContext filterContext)
+        public Task OnActionExecuted(ActionExecutedContext filterContext)
         {
             return Task.CompletedTask;
         }
 
-        public    Task OnActionExecuting(ActionExecutingContext filterContext)
+        public Task OnActionExecuting(ActionExecutingContext filterContext)
         {
             var address = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
             RpcContext.GetContext().SetAttachment("RemoteIpAddress", address.ToString());
-            if (_ipChecker.IsBlackIp(address,filterContext.Message.RoutePath))
+            if (_ipChecker.IsBlackIp(address, filterContext.Message.RoutePath))
             {
                 filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Your IP address is not allowed" };
             }
-             return Task.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 }

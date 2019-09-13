@@ -99,7 +99,7 @@ namespace Surging.Core.Stage
 
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
-            CPlatform.AppConfig.ServerOptions.DisableServiceRegistration = true;
+           // CPlatform.AppConfig.ServerOptions.DisableServiceRegistration = true;
             var section = CPlatform.AppConfig.GetSection("Stage");
             if (section.Exists())
             {

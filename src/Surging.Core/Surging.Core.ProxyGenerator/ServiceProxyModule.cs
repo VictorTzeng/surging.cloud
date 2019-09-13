@@ -13,6 +13,7 @@ using System.Linq;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.ProxyGenerator.Diagnostics;
 using Surging.Core.CPlatform.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Surging.Core.ProxyGenerator
 {
@@ -34,7 +35,11 @@ namespace Surging.Core.ProxyGenerator
                                 builder.Update(serviceProvider.Current.ComponentRegistry);
                                 serviceProvider.GetInstances<IServiceEntryManager>().UpdateEntries(serviceProvider.GetInstances<IEnumerable<IServiceEntryProvider>>());
                             //  serviceProvider.GetInstances<IServiceProxyFactory>().RegisterProxType(result.Value.Item2.ToArray(), result.Value.Item1.ToArray());
-                            serviceProvider.GetInstances<IServiceRouteProvider>().RegisterRoutes(0);
+                                serviceProvider.GetInstances<IServiceRouteProvider>().RegisterRoutes(0);
+                                if (AppConfig.ServerOptions.IsCompensationRegisterRoutes)
+                                {
+                                    new ServiceRouteCompensator(serviceProvider.GetInstances<ILogger<ServiceRouteCompensator>>(), serviceProvider.GetInstances<IServiceRouteProvider>());
+                                }
                                 serviceProvider.GetInstances<IServiceProxyFactory>();
                             }
                         });

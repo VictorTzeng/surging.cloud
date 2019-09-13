@@ -110,6 +110,9 @@ namespace Surging.Core.Consul
 
         private async Task<ServiceCache[]> GetCaches(IEnumerable<string> childrens)
         {
+            if (childrens == null) {
+                return new ServiceCache[0];
+            }
 
             childrens = childrens.ToArray();
             var caches = new List<ServiceCache>(childrens.Count());
@@ -172,16 +175,21 @@ namespace Surging.Core.Consul
         {
             if (_serviceCaches != null && _serviceCaches.Length > 0)
                 return;
+            Action<string[]> action = null;
             var client =await GetConsulClient();
-             var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CachePath,
+            if (_configInfo.EnableChildrenMonitor) {
+                var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CachePath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                   (result) => ConvertPaths(result).Result);
-            if (client.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
+                action = currentData => watcher.SetCurrentData(currentData);
+            }
+            var cacheMateDataKeys = await client.KV.Keys(_configInfo.CachePath);
+            if (cacheMateDataKeys.Response != null && cacheMateDataKeys.Response.Any())
             {
                 var result = await client.GetChildrenAsync(_configInfo.CachePath);
                 var keys = await client.KV.Keys(_configInfo.CachePath);
-                var childrens = result; 
-                watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
+                var childrens = result;
+                action?.Invoke(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
                 _serviceCaches = await GetCaches(keys.Response);
             }
             else
@@ -241,17 +249,14 @@ namespace Surging.Core.Consul
         private async Task<string[]> ConvertPaths(string[] datas)
         {
             List<string> paths = new List<string>();
-            if (datas != null && datas.Any())
+            foreach (var data in datas)
             {
-                foreach (var data in datas)
-                {
-                    var result = await GetCacheData(data);
-                    var serviceId = result?.CacheDescriptor.Id;
-                    if (!string.IsNullOrEmpty(serviceId))
-                        paths.Add(serviceId);
-                }
+                var result = await GetCacheData(data);
+                var serviceId = result?.CacheDescriptor.Id;
+                if (!string.IsNullOrEmpty(serviceId))
+                    paths.Add(serviceId);
             }
-           
+
             return paths.ToArray();
         }
 

@@ -104,11 +104,16 @@ namespace Surging.Core.CPlatform
             {
                 var routeProvider = mapper.Resolve<IServiceRouteProvider>();
                 if (AppConfig.ServerOptions.EnableRouteWatch)
+                {
                     new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),
-                        async () => await routeProvider.RegisterRoutes(
-                        Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
+                       async () => await routeProvider.RegisterRoutes(
+                       Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
+                }
                 else
+                {
                     await routeProvider.RegisterRoutes(0);
+                    new ServiceRouteCompensator(mapper.Resolve<ILogger<ServiceRouteCompensator>>(), routeProvider);
+                }
             }
         }
 

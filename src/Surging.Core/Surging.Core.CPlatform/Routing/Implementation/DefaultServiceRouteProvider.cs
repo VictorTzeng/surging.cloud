@@ -194,7 +194,8 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             {
                 var routePath = Regex.Replace(i.ServiceDescriptor.RoutePath, pattern, "");
                 var newPath = path.Replace(routePath, "");
-                return (newPath.StartsWith("/") || newPath.Length == 0) && i.ServiceDescriptor.RoutePath.Split("/").Length == path.Split("/").Length && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload");
+                return ((newPath.StartsWith("/") || newPath.Length == 0) && i.ServiceDescriptor.RoutePath.Split("/").Length == path.Split("/").Length && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload"))
+                ;
             });
 
 

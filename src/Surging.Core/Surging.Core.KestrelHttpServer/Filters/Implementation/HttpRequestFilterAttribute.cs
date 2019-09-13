@@ -11,6 +11,7 @@ using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Autofac;
 using Surging.Core.CPlatform.Exceptions;
+using System.Web;
 
 namespace Surging.Core.KestrelHttpServer.Filters.Implementation
 {
@@ -48,7 +49,13 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
             }
             else
             {
-                var serviceRoute = await _serviceRouteProvider.GetLocalRouteByPathRegex(filterContext.Message.RoutePath);
+                var path = HttpUtility.UrlDecode(GetRoutePath(filterContext.Context.Request.Path.ToString()));
+                var serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
+                if (serviceRoute == null)
+                {
+                    serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(filterContext.Message.RoutePath);
+                }
+
                 var httpMethods = serviceRoute.ServiceDescriptor.HttpMethod();
                 if (!string.IsNullOrEmpty(httpMethods) && !httpMethods.Contains(filterContext.Context.Request.Method))
                 {
@@ -60,6 +67,25 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
                     };
                 }
             }
+        }
+
+        private string GetRoutePath(string path)
+        {
+            string routePath = "";
+            var urlSpan = path.AsSpan();
+            var len = urlSpan.IndexOf("?");
+            if (urlSpan.LastIndexOf("/") == 0)
+            {
+                routePath = path;
+            }
+            else
+            {
+                if (len == -1)
+                    routePath = urlSpan.TrimStart("/").ToString().ToLower();
+                else
+                    routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
+            }
+            return routePath;
         }
     }
 }

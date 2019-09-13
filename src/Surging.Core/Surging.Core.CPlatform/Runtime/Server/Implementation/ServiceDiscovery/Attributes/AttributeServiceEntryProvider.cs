@@ -23,7 +23,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
 
         #region Constructor
 
-        public AttributeServiceEntryProvider(IEnumerable<Type> types, IClrServiceEntryFactory clrServiceEntryFactory, ILogger<AttributeServiceEntryProvider> logger ,CPlatformContainer serviceProvider)
+        public AttributeServiceEntryProvider(IEnumerable<Type> types, IClrServiceEntryFactory clrServiceEntryFactory, ILogger<AttributeServiceEntryProvider> logger, CPlatformContainer serviceProvider)
         {
             _types = types;
             _clrServiceEntryFactory = clrServiceEntryFactory;
@@ -50,7 +50,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             var entries = new List<ServiceEntry>();
             foreach (var service in services)
             {
-                entries.AddRange( _clrServiceEntryFactory.CreateServiceEntry(service));
+                entries.AddRange(_clrServiceEntryFactory.CreateServiceEntry(service));
             }
             return entries;
         }
@@ -79,7 +79,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             var services = _types.Where(i =>
             {
                 var typeInfo = i.GetTypeInfo();
-                return typeInfo.IsInterface && typeInfo.GetCustomAttribute<ServiceBundleAttribute>() != null && _serviceProvider.Current.IsRegistered(i);
+                return typeInfo.IsInterface
+                && typeInfo.GetCustomAttribute<ServiceBundleAttribute>() != null
+                && _serviceProvider.Current.IsRegistered(i);
             }).Distinct().ToArray();
             return services;
         }
