@@ -115,6 +115,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".configs", ".configs", "{78
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Validation", "Surging.Core\Surging.Core.Validation\Surging.Core.Validation.csproj", "{1E3116B7-3E29-4AF7-A9CC-DEA007005146}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Services.Server2", "Surging.Services\Surging.Services.Server2\Surging.Services.Server2.csproj", "{ED240DCC-172D-44F5-897B-1979E9A342CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -293,6 +295,10 @@ Global
 		{1E3116B7-3E29-4AF7-A9CC-DEA007005146}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E3116B7-3E29-4AF7-A9CC-DEA007005146}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E3116B7-3E29-4AF7-A9CC-DEA007005146}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED240DCC-172D-44F5-897B-1979E9A342CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED240DCC-172D-44F5-897B-1979E9A342CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED240DCC-172D-44F5-897B-1979E9A342CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED240DCC-172D-44F5-897B-1979E9A342CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -338,6 +344,7 @@ Global
 		{EDABE9D2-6A92-409B-9C8B-F192B1476F67} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{9C8AA43E-980B-4E32-85AD-20D2B1E8B543} = {CF034401-1479-4FEA-9F1E-4F22398D4BCF}
 		{1E3116B7-3E29-4AF7-A9CC-DEA007005146} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{ED240DCC-172D-44F5-897B-1979E9A342CB} = {30ADB177-C82F-49A7-8FA7-C32996543C4A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}

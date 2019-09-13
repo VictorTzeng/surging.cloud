@@ -14,6 +14,19 @@ services:
       - ${LOG_DIR:-/var/logs}/auth:/app/logs
     networks:
       - surging_sample_service_net
+  surging.sample.server2:
+    image: surging/surging.sample.server2:${TAG:-latest}
+    build:
+      context: ../..
+      dockerfile: src/Surging.Services/Surging.Services.Server2/Dockerfile
+      args:
+        host_workdir: src/Surging.Services/Surging.Services.Server2
+        host_name: Surging.Services.Server2.dll
+        sln_name:  src/Surging.sln
+    volumes:
+      - ${LOG_DIR:-/var/logs}/auth:/app/logs
+    networks:
+      - surging_sample_service_net
 
   surging.sample.client:
     image: surging/surging.sample.client:${TAG:-latest}

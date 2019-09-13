@@ -8,6 +8,13 @@ services:
       - ../../src/Shared/configs:/app/configs
       - ../annotationxmldir:/app/annotationxmldir
 
+  surging.sample.server2:
+    environment:
+      LogPath: /app/configs/log4net.config
+    volumes:
+      - ../../src/Shared/configs:/app/configs
+      - ../annotationxmldir:/app/annotationxmldir
+
   surging.sample.client:
     environment:
       LogPath: /app/configs/log4net.config

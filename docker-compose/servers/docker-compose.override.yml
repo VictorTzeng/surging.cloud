@@ -21,6 +21,26 @@ services:
     ports:
       - "18088:8080"
 
+  surging.sample.server2:
+    environment:
+      Register_Conn: ${REGISTER_CONN:-consul:8500}
+      Register_SessionTimeout: ${REGISTER_SESSION_TIMEOUT:-50}
+      UseEngineParts: ${NORMAL_SERVER_ENGINE}
+      UseKestrelHttpParts: ${KESTREL_SERVER_ENGINE}
+      EventBusConnection: ${RABBITMQ_CONNECTION:-rabbitmq}
+      EventBusUserName:  ${RABBITMQ_USERNAME:-rabbitmq}
+      EventBusPassword:  ${RABBITMQ_PASSWORD:-rabbitmq}
+      EventBusPort: ${RABBITMQ_PORT:-5672}
+      Environment: ${ENVIRONMENT:-Development}
+      ForceDisplayStackTrace: ${FORCED_DISPLAY_STACKTRACE:-false}
+      SwaggerTitle: "surging.sample.server2"
+      SwaggerDes: "server api docs"
+      SupportName: "liuhongliang"
+      SupportEmail: "liuhongliang@jingshonline.com"
+      EnableAuthorization: ${ENABLE_AUTHORIZATION:-false}
+    ports:
+      - "18089:8080"
+
   surging.sample.client:
     environment:
       Register_Conn: ${REGISTER_CONN:-consul:8500}
