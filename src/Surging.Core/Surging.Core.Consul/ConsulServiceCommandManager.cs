@@ -250,7 +250,7 @@ namespace Surging.Core.Consul
 
         private async Task EnterServiceCommands()
         {
-            if (_serviceCommands != null)
+            if (_serviceCommands != null && _serviceCommands.Any())
                 return;
             Action<string[]> action = null;
             var client = await GetConsulClient();
