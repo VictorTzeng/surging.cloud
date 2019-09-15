@@ -110,7 +110,7 @@ namespace Surging.Core.Consul
 
         private async Task<ServiceCache[]> GetCaches(IEnumerable<string> childrens)
         {
-            if (childrens == null) {
+            if (childrens == null || !childrens.Any()) {
                 return new ServiceCache[0];
             }
 
@@ -248,6 +248,11 @@ namespace Surging.Core.Consul
 
         private async Task<string[]> ConvertPaths(string[] datas)
         {
+           
+            if (datas == null || !datas.Any())
+            {
+                return new string[0];
+            }
             List<string> paths = new List<string>();
             foreach (var data in datas)
             {
@@ -256,8 +261,9 @@ namespace Surging.Core.Consul
                 if (!string.IsNullOrEmpty(serviceId))
                     paths.Add(serviceId);
             }
-
             return paths.ToArray();
+
+
         }
 
         private async ValueTask<ConsulClient> GetConsulClient()
@@ -315,7 +321,7 @@ namespace Surging.Core.Consul
                 _logger.LogDebug($"需要被添加的服务缓存节点：{string.Join(",", createdChildrens)}");
 
             //获取新增的缓存信息。
-            var newCaches = (await GetCaches(createdChildrens)).ToArray();
+            var newCaches = await GetCaches(createdChildrens);
 
             var caches = _serviceCaches.ToArray();
             lock (_serviceCaches)
