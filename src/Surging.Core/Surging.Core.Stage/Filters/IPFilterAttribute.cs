@@ -17,11 +17,15 @@ namespace Surging.Core.Stage.Filters
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IIPChecker _ipChecker;
+        private const int _order = 9999;
         public IPFilterAttribute(IHttpContextAccessor httpContextAccessor, IIPChecker ipChecker)
         {
             _httpContextAccessor = httpContextAccessor;
             _ipChecker = ipChecker;
         }
+
+        public int Order => _order;
+
         public Task OnActionExecuted(ActionExecutedContext filterContext)
         {
             return Task.CompletedTask;

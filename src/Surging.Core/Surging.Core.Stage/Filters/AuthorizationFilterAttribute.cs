@@ -18,10 +18,14 @@ namespace Surging.Core.Stage.Filters
     public class AuthorizationFilterAttribute : IAuthorizationFilter
     {
         private readonly IAuthorizationServerProvider _authorizationServerProvider;
+        private const int _order = int.MaxValue;
         public AuthorizationFilterAttribute()
         {
             _authorizationServerProvider = ServiceLocator.Current.Resolve<IAuthorizationServerProvider>();
         }
+
+        public int Order { get { return _order; } }
+
         public async Task OnAuthorization(AuthorizationFilterContext filterContext)
         {
             var gatewayAppConfig = AppConfig.Options.ApiGetWay;

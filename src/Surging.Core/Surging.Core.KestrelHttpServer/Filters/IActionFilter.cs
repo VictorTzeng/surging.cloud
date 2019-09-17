@@ -11,5 +11,7 @@ namespace Surging.Core.KestrelHttpServer.Filters
         Task OnActionExecuting(ActionExecutingContext filterContext);
 
         Task OnActionExecuted(ActionExecutedContext filterContext);
+
+        int Order { get; }
     }
 }

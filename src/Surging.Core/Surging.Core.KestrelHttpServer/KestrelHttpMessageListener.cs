@@ -128,11 +128,11 @@ namespace Surging.Core.KestrelHttpServer
                 var sender = new HttpServerMessageSender(_serializer, context);
                 try
                 {
-                    var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
+                    var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>().OrderByDescending(p=>p.Order);
                     var isSuccess = await OnAuthorization(context, sender, messageId, filters);
                     if (isSuccess)
                     {
-                        var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
+                        var actionFilters = app.ApplicationServices.GetServices<IActionFilter>().OrderByDescending(p => p.Order);
                         await OnReceived(sender, messageId, context, actionFilters);
                     }
                 }

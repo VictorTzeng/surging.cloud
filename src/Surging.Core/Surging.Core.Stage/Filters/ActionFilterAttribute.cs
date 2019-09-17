@@ -24,6 +24,10 @@ namespace Surging.Core.Stage.Filters
     public class ActionFilterAttribute : IActionFilter
     {
         private readonly IAuthorizationServerProvider _authorizationServerProvider;
+        private const int _order = 9997;
+
+        public int Order => _order;
+
         public ActionFilterAttribute()
         {
             _authorizationServerProvider = ServiceLocator.Current.Resolve<IAuthorizationServerProvider>();

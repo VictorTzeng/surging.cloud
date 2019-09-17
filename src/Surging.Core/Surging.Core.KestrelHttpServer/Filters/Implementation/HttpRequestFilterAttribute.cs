@@ -21,11 +21,15 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
         internal const StatusCode Http405EndpointStatusCode = StatusCode.Http405EndpointStatusCode;
         private readonly IServiceRouteProvider _serviceRouteProvider;
         private readonly IServiceEntryLocate _serviceEntryLocate;
+        private const int _order = 9998;
         public HttpRequestFilterAttribute()
         {
             _serviceRouteProvider = ServiceLocator.Current.Resolve<IServiceRouteProvider>(); ;
             _serviceEntryLocate = ServiceLocator.Current.Resolve<IServiceEntryLocate>(); ;
         }
+
+        public int Order => _order;
+
         public Task OnActionExecuted(ActionExecutedContext filterContext)
         {
             return Task.CompletedTask;
