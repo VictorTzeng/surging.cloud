@@ -45,4 +45,4 @@ services:
 networks:
   surging_sample_service_net: 
     external:
-      name: surging_sample_service_net
+      name: ${CLUSTER_NETWORK:-surging_sample_service_net}
