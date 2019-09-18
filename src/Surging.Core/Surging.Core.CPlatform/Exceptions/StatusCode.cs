@@ -57,5 +57,10 @@
         /// 未知错误
         /// </summary>
         UnKnownError = -1,
+
+        /// <summary>
+        /// 服务不可用
+        /// </summary>
+        ServiceUnavailability = 509,
     }
 }

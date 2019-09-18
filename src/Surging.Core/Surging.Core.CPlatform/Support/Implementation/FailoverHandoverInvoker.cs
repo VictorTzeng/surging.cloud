@@ -48,7 +48,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                     }
                     result = (T)_typeConvertibleService.Convert(message.Result, typeof(T));
                 }
-            } while (message == null && ++time < command.FailoverCluster);
+            } while ((message == null || message.StatusCode == StatusCode.ServiceUnavailability) && ++time < command.FailoverCluster);
             return result;
         }
 
@@ -68,7 +68,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                     }
                 }
             }
-            while (message == null && ++time < command.FailoverCluster);
+            while ((message == null || message.StatusCode == StatusCode.ServiceUnavailability) && ++time < command.FailoverCluster);
         }
 
     }

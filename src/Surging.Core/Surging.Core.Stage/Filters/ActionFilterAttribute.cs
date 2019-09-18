@@ -51,7 +51,7 @@ namespace Surging.Core.Stage.Filters
                 }
                 else
                 {
-                    filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
+                    filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.RequestError, Message = "请求失败,请稍后重试" };
                 }
             }
             else if (filterContext.Route.ServiceDescriptor.AuthType() == AuthorizationType.AppSecret.ToString())

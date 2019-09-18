@@ -346,9 +346,11 @@ namespace Surging.Core.Consul
             if (commands != null && commands.Any() && commands.Count() <= routeCount)
             {
                 if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
-                    _logger.LogWarning($"从数据中心获取到{routeCount}条路由信息,{commands.Count()}条服务命令信息,需要更新路由信息");
+                    _logger.LogWarning($"从数据中心获取到{routeCount}条路由信息,{commands.Count()}条服务命令信息,无需更新路由信息");
                 return false;
             }
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
+                _logger.LogWarning($"从数据中心获取到{routeCount}条路由信息,{commands.Count()}条服务命令信息,需要更新路由信息");
             return true;
         }
 

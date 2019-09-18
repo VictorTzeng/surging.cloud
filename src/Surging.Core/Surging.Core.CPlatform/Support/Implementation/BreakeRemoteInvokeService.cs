@@ -59,7 +59,15 @@ namespace Surging.Core.CPlatform.Support.Implementation
             if (command.BreakerForceClosed)
             {
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) => { v.LocalServiceRequests++; return v; });
-                return null;
+                if (reachConcurrentRequest() || reachRequestVolumeThreshold() || reachErrorThresholdPercentage())
+                {
+                    return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds, item);
+                }
+                else
+                {
+                    return null;
+                }
+                
             }
             else
             {
@@ -67,12 +75,17 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 {
                     if (intervalSeconds * 1000 > command.BreakeSleepWindowInMilliseconds)
                     {
-                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds, item, true);
+                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds, item);
                     }
                     else
                     {
                         _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) => { v.LocalServiceRequests++; return v; });
-                        return null;
+                        if (_logger.IsEnabled(LogLevel.Debug)) {
+                            _logger.LogDebug("当前服务{serviceId}-{serviceKey}当前不可用,请稍后重试");
+                        }
+                        var breakeSeconds = Math.Round((command.BreakeSleepWindowInMilliseconds - intervalSeconds * 1000) / 1000,0);
+                        return new RemoteInvokeResultMessage() { ExceptionMessage = $"当前服务{serviceId}-{serviceKey}当前不可用,请稍后{breakeSeconds}s后重试", StatusCode = StatusCode.ServiceUnavailability };
+                        //return null；
                     }
                 }
                 else
@@ -82,7 +95,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
         }
 
-        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, int requestTimeout, string item, bool isAbnormalRequest = false)
+        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, int requestTimeout, string item)
         {
             CancellationTokenSource source = new CancellationTokenSource();
             var token = source.Token;
@@ -126,16 +139,6 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 });
                 await ExecuteExceptionFilter(ex, invokeMessage, token);
                 if (ex is BusinessException || ex.InnerException is BusinessException) {
-                    return new RemoteInvokeResultMessage()
-                    {
-                        ExceptionMessage = ex.GetExceptionMessage(),
-                        Result = null,
-                        StatusCode = ex.GetGetExceptionStatusCode()
-                    };
-                }
-
-                if (isAbnormalRequest)
-                {
                     return new RemoteInvokeResultMessage()
                     {
                         ExceptionMessage = ex.GetExceptionMessage(),
