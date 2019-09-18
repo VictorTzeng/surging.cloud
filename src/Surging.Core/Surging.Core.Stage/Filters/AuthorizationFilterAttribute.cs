@@ -47,7 +47,7 @@ namespace Surging.Core.Stage.Filters
                             }
                             else
                             {
-                                var payload = _authorizationServerProvider.GetPayloadString(author);
+                                var payload = _authorizationServerProvider.GetPayload(author);
                                 RpcContext.GetContext().SetAttachment("payload", payload);
                             }
                         }

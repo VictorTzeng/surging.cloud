@@ -3,6 +3,7 @@ using Surging.Core.Common;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
+using Surging.Core.CPlatform.Runtime.Session;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.KestrelHttpServer;
 using Surging.Core.KestrelHttpServer.Internal;
@@ -23,9 +24,11 @@ namespace Surging.Modules.Common.Domain
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;
+        private readonly ISurgingSession _surgingSession;
         public UserService(UserRepository repository)
         {
             this._repository = repository;
+            _surgingSession = NullSurgingSession.Instance;
         }
 
         public async Task<string> GetUserName(int id)
@@ -36,6 +39,7 @@ namespace Surging.Modules.Common.Domain
 
         public Task<bool> Exists(int id)
         {
+            var loginUserId = _surgingSession.UserId;
             return Task.FromResult(true);
         }
 

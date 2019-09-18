@@ -37,7 +37,7 @@ namespace Surging.Core.ApiGateWay.OAuth
         {
             string result = null;
             var payload = await _serviceProxyProvider.Invoke<object>(parameters,AppConfig.AuthorizationRoutePath, AppConfig.AuthorizationServiceKey);
-            if (payload!=null && !payload.Equals("null") )
+            if (payload !=null && !payload.Equals("null") )
             {
                 var jwtHeader = JsonConvert.SerializeObject(new JWTSecureDataHeader() { TimeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") });
                 var base64Payload = ConverBase64String(JsonConvert.SerializeObject(payload));
@@ -104,6 +104,18 @@ namespace Surging.Core.ApiGateWay.OAuth
                 byte[] hashmessage = hmacsha256.ComputeHash(messageBytes);
                 return Convert.ToBase64String(hashmessage);
             }
+        }
+
+        public object GetPayload(string token)
+        {
+            string result = null;
+            var jwtToken = token.Split('.');
+            if (jwtToken.Length == 3)
+            {
+
+                result = Encoding.UTF8.GetString(Convert.FromBase64String(jwtToken[1]));
+            }
+            return JsonConvert.DeserializeObject(result);
         }
     }
 }

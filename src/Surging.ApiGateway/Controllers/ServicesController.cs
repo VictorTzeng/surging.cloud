@@ -150,7 +150,7 @@ namespace Surging.ApiGateway.Controllers
                 }
                 else
                 {
-                    var payload = _authorizationServerProvider.GetPayloadString(author);
+                    var payload = _authorizationServerProvider.GetPayload(author);
                     RpcContext.GetContext().SetAttachment("payload", payload);
                     if (model.Count>0)
                     {

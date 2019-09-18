@@ -14,5 +14,7 @@ namespace Surging.Core.ApiGateWay.OAuth
         Task<bool> RefreshToken(string token);
 
         string GetPayloadString(string token);
+
+        object GetPayload(string token);
     }
 }
