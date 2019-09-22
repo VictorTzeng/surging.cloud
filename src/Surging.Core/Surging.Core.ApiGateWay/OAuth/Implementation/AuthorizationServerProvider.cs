@@ -36,7 +36,7 @@ namespace Surging.Core.ApiGateWay.OAuth
         public async Task<string> GenerateTokenCredential(Dictionary<string, object> parameters)
         {
             string result = null;
-            var payload = await _serviceProxyProvider.Invoke<object>(parameters,AppConfig.AuthorizationRoutePath, AppConfig.AuthorizationServiceKey);
+            var payload = await _serviceProxyProvider.Invoke<object>(parameters,AppConfig.AuthenticationRoutePath, AppConfig.AuthenticationServiceKey);
             if (payload !=null && !payload.Equals("null") )
             {
                 var jwtHeader = JsonConvert.SerializeObject(new JWTSecureDataHeader() { TimeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") });

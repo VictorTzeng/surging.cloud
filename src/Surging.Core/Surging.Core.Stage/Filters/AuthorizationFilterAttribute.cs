@@ -12,16 +12,25 @@ using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using System.Threading.Tasks;
 using Autofac;
 using System;
+using Surging.Core.ProxyGenerator;
+using System.IO;
+using Surging.Core.CPlatform.Serialization;
+using System.Collections.Generic;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Core.Stage.Filters
 {
     public class AuthorizationFilterAttribute : IAuthorizationFilter
     {
         private readonly IAuthorizationServerProvider _authorizationServerProvider;
+        private readonly IServiceProxyProvider _serviceProxyProvider;
+        private readonly IServiceRouteProvider _serviceRouteProvider;
         private const int _order = int.MaxValue;
         public AuthorizationFilterAttribute()
         {
             _authorizationServerProvider = ServiceLocator.Current.Resolve<IAuthorizationServerProvider>();
+            _serviceProxyProvider = ServiceLocator.Current.Resolve<IServiceProxyProvider>();
+            _serviceRouteProvider = ServiceLocator.Current.Resolve<IServiceRouteProvider>();
         }
 
         public int Order { get { return _order; } }
@@ -29,8 +38,12 @@ namespace Surging.Core.Stage.Filters
         public async Task OnAuthorization(AuthorizationFilterContext filterContext)
         {
             var gatewayAppConfig = AppConfig.Options.ApiGetWay;
+           
             if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.DisableNetwork())
-                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.RequestError, Message = "Request error" };
+            {
+                var actionName = filterContext.Route.ServiceDescriptor.GroupName().IsNullOrEmpty() ? filterContext.Route.ServiceDescriptor.RoutePath : filterContext.Route.ServiceDescriptor.GroupName();
+                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthorized, Message = $"{actionName}禁止被外网访问" };
+            }
             else
             {
                 if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.EnableAuthorization())
@@ -43,24 +56,47 @@ namespace Surging.Core.Stage.Filters
                             var isSuccess = await _authorizationServerProvider.ValidateClientAuthentication(author);
                             if (!isSuccess)
                             {
-                                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
+                                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "身份凭证(Token)不合法" };
                             }
                             else
                             {
+                               
                                 var payload = _authorizationServerProvider.GetPayload(author);
                                 RpcContext.GetContext().SetAttachment("payload", payload);
+            
+                                if (!gatewayAppConfig.AuthorizationRoutePath.IsNullOrEmpty())
+                                {
+                                    var rpcParams = new Dictionary<string, object>() {
+                                        {  "serviceId", filterContext.Route.ServiceDescriptor.Id }
+                                    };
+                                    var authorizationRoutePath = await _serviceRouteProvider.GetRouteByPathRegex(gatewayAppConfig.AuthorizationRoutePath);
+                                    if (authorizationRoutePath == null) {
+                                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.RequestError, Message = "没有找到授权认证WebApi路由信息" };
+                                        return;
+                                    }
+                                    var isPermission = await _serviceProxyProvider.Invoke<bool>(rpcParams, gatewayAppConfig.AuthorizationRoutePath, gatewayAppConfig.AuthorizationServiceKey);
+                                    if (!isPermission)
+                                    {
+                                        var actionName = filterContext.Route.ServiceDescriptor.GroupName().IsNullOrEmpty() ? filterContext.Route.ServiceDescriptor.RoutePath : filterContext.Route.ServiceDescriptor.GroupName();
+                                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.RequestError, Message = $"{actionName}鉴权失败,请稍后重试" };
+                                    }
+                                }
+                               
                             }
                         }
                         else
-                            filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "Invalid authentication credentials" };
+                        {
+                            filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "您还没有登录系统" };
+                        }
 
                     }
                 }
             }
-          
-            if (String.Compare(filterContext.Path.ToLower(), gatewayAppConfig.TokenEndpointPath, true) == 0)
-                filterContext.Context.Items.Add("path", gatewayAppConfig.AuthorizationRoutePath);
 
+            if (String.Compare(filterContext.Path.ToLower(), gatewayAppConfig.TokenEndpointPath, true) == 0)
+            {
+                filterContext.Context.Items.Add("path", gatewayAppConfig.AuthenticationRoutePath);
+            }           
         }
     }
 }

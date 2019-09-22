@@ -50,8 +50,10 @@
     "Protocols": "Http1AndHttp2",
     "ApiGetWay": {
       "AccessTokenExpireTimeSpan": "30",
-      "AuthorizationRoutePath": "api/user/authentication",
-      "AuthorizationServiceKey": "User",
+      "AuthorizationRoutePath": "api/permission/check",
+      "AuthorizationServiceKey": "",
+      "AuthenticationRoutePath": "api/user/authentication",
+      "AuthenticationServiceKey": "User",
       "TokenEndpointPath": "api/oauth2/token",
       "CacheMode": "ddlCache.Redis" //MemoryCache or  gateway.Redis save token
     },

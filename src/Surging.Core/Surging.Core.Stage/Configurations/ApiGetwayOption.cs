@@ -8,6 +8,10 @@ namespace Surging.Core.Stage.Configurations
     {
         public  string CacheMode{get;set; }
 
+        public string AuthenticationServiceKey { get; set; }
+
+        public string AuthenticationRoutePath { get; set; }
+
         public string AuthorizationServiceKey { get; set; }
 
         public string AuthorizationRoutePath { get; set; }

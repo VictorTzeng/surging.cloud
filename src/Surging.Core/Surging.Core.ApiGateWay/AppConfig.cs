@@ -45,6 +45,40 @@ namespace Surging.Core.ApiGateWay
             }
         }
 
+        private static string _authenticationServiceKey;
+
+        public static string AuthenticationServiceKey {
+            get
+            {
+                if (Configuration == null)
+                    return _authenticationServiceKey;
+                return Configuration["AuthenticationServiceKey"] ?? _authenticationServiceKey;
+            }
+            set
+            {
+
+                _authenticationServiceKey = value;
+            }
+        }
+
+        private static string _authenticationRoutePath;
+
+        public static string AuthenticationRoutePath
+        {
+            get
+            {
+                if (Configuration == null)
+                    return _authenticationRoutePath;
+                return Configuration["AuthenticationRoutePath"] ?? _authenticationRoutePath;
+            }
+            set
+            {
+
+                _authenticationRoutePath = value;
+            }
+        }
+
+
         private static TimeSpan _accessTokenExpireTimeSpan = TimeSpan.FromMinutes(30);
         public static TimeSpan AccessTokenExpireTimeSpan
         {
