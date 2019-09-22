@@ -71,14 +71,14 @@ namespace Surging.Core.Stage.Filters
                                     };
                                     var authorizationRoutePath = await _serviceRouteProvider.GetRouteByPathRegex(gatewayAppConfig.AuthorizationRoutePath);
                                     if (authorizationRoutePath == null) {
-                                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.RequestError, Message = "没有找到授权认证WebApi路由信息" };
+                                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.RequestError, Message = "没有找到实现接口鉴权的WebApi的路由信息" };
                                         return;
                                     }
                                     var isPermission = await _serviceProxyProvider.Invoke<bool>(rpcParams, gatewayAppConfig.AuthorizationRoutePath, gatewayAppConfig.AuthorizationServiceKey);
                                     if (!isPermission)
                                     {
                                         var actionName = filterContext.Route.ServiceDescriptor.GroupName().IsNullOrEmpty() ? filterContext.Route.ServiceDescriptor.RoutePath : filterContext.Route.ServiceDescriptor.GroupName();
-                                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.RequestError, Message = $"{actionName}鉴权失败,请稍后重试" };
+                                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.RequestError, Message = $"没有请求{actionName}的权限" };
                                     }
                                 }
                                
@@ -86,7 +86,7 @@ namespace Surging.Core.Stage.Filters
                         }
                         else
                         {
-                            filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "您还没有登录系统" };
+                            filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = CPlatform.Exceptions.StatusCode.UnAuthentication, Message = "您还没有登录系统,请先登录系统" };
                         }
 
                     }
