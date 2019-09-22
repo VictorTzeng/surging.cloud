@@ -14,6 +14,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         public ServiceAttribute()
         {
             IsWaitExecution = true;
+            EnableAuthorization = true;
         }
 
         /// <summary>
