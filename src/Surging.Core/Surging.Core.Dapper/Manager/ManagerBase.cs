@@ -37,7 +37,6 @@ namespace Surging.Core.Dapper.Manager
                         conn = new SqlConnection(DbSetting.Instance.ConnectionString);
                         break;
                 }
-                conn.Open();
                 return conn;
             }
         }

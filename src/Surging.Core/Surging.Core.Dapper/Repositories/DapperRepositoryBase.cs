@@ -44,7 +44,6 @@ namespace Surging.Core.Dapper.Repositories
                     conn = new SqlConnection(DbSetting.Instance.ConnectionString);
                     break;
             }
-            conn.Open();
             return conn;
 
         }
