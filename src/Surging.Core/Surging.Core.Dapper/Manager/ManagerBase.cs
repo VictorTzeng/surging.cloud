@@ -7,6 +7,7 @@ using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.ProxyGenerator;
 using System;
+using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -43,6 +44,10 @@ namespace Surging.Core.Dapper.Manager
 
         protected virtual void UnitOfWork(Action<DbConnection, DbTransaction> action, DbConnection conn)
         {
+            if (conn.State != ConnectionState.Open) 
+            {
+                conn.Open();
+            }
             var trans = conn.BeginTransaction();
             try
             {
@@ -63,6 +68,11 @@ namespace Surging.Core.Dapper.Manager
 
         protected virtual async Task UnitOfWorkAsync(Func<DbConnection, DbTransaction, Task> action, DbConnection conn)
         {
+            if (conn.State != ConnectionState.Open)
+            {
+                conn.Open();
+            }
+
             var trans = conn.BeginTransaction();
             try
             {
