@@ -17,6 +17,7 @@ using Surging.Core.Protocol.Http;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
+using Surging.Core.System.Intercept;
 using Surging.Core.Zookeeper.Configurations;
 using System;
 //using Surging.Core.Zookeeper;
@@ -39,7 +40,8 @@ namespace Surging.Services.Server
                         .AddRelateService()
                         .AddConfigurationWatch()
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); 
-                        .AddServiceEngine(typeof(SurgingServiceEngine));
+                        .AddServiceEngine(typeof(SurgingServiceEngine))
+                        .AddClientIntercepted(typeof(CacheProviderInterceptor));
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })

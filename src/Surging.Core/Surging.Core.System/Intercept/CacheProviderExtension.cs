@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Surging.Core.Caching;
 using Surging.Core.CPlatform.Cache;
+using Surging.Core.CPlatform.Serialization;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Threading.Tasks;
 
@@ -10,6 +12,7 @@ namespace Surging.Core.System.Intercept
     {
         public static async Task<T> GetFromCacheFirst<T>(this ICacheProvider cacheProvider, string key, Func<Task<T>> getFromPersistence, Type returnType, long? storeTime = null) where T : class
         {
+            var serializer = ServiceLocator.GetService<ISerializer<string>>();
             object returnValue;
             try
             {
@@ -19,7 +22,7 @@ namespace Surging.Core.System.Intercept
                     returnValue = await getFromPersistence();
                     if (returnValue != null)
                     {
-                        resultJson = JsonConvert.SerializeObject(returnValue);
+                        resultJson = serializer.Serialize(returnValue);
                         if (storeTime.HasValue)
                         {
                             cacheProvider.Remove(key);
@@ -34,7 +37,7 @@ namespace Surging.Core.System.Intercept
                 }
                 else
                 {
-                    returnValue = JsonConvert.DeserializeObject(resultJson, returnType);
+                    returnValue = serializer.Deserialize(resultJson, returnType);
                 }
                 return returnValue as T;
             }
@@ -45,8 +48,9 @@ namespace Surging.Core.System.Intercept
             }
         }
 
-        public static async Task<T> GetFromCacheFirst<T>(this ICacheProvider cacheProvider, ICacheProvider l2cacheProvider,string l2Key, string key, Func<Task<T>> getFromPersistence, Type returnType, long? storeTime = null) where T : class
+        public static async Task<T> GetFromCacheFirst<T>(this ICacheProvider cacheProvider, ICacheProvider l2cacheProvider, string l2Key, string key, Func<Task<T>> getFromPersistence, Type returnType, long? storeTime = null) where T : class
         {
+            var serializer = ServiceLocator.GetService<ISerializer<string>>();
             object returnValue;
             try
             {
@@ -56,31 +60,31 @@ namespace Surging.Core.System.Intercept
                     returnValue = await getFromPersistence();
                     if (returnValue != null)
                     {
-                        var resultJson = JsonConvert.SerializeObject(returnValue);
+                        var resultJson = serializer.Serialize(returnValue); //JsonConvert.SerializeObject(returnValue);
                         var sign = Guid.NewGuid();
-                        signJson = JsonConvert.SerializeObject(sign);
+                        signJson = serializer.Serialize(sign); // JsonConvert.SerializeObject(sign);
                         if (l2Key == key)
                         {
                             SetCache(cacheProvider, key, signJson, storeTime);
                         }
-                        SetCache(l2cacheProvider, l2Key, new ValueTuple<string,string>(signJson, resultJson), storeTime);
+                        SetCache(l2cacheProvider, l2Key, new ValueTuple<string, string>(signJson, resultJson), storeTime);
                     }
                 }
                 else
                 {
-                   var l2Cache= l2cacheProvider.Get<ValueTuple<string, string>>(l2Key);
-                    if(l2Cache==default || l2Cache.Item1!=signJson)
+                    var l2Cache = l2cacheProvider.Get<ValueTuple<string, string>>(l2Key);
+                    if (l2Cache == default || l2Cache.Item1 != signJson)
                     {
                         returnValue = await getFromPersistence();
                         if (returnValue != null)
                         {
-                            var resultJson = JsonConvert.SerializeObject(returnValue);
+                            var resultJson = serializer.Serialize(returnValue); //JsonConvert.SerializeObject(returnValue);
                             SetCache(l2cacheProvider, l2Key, new ValueTuple<string, string>(signJson, resultJson), storeTime);
                         }
                     }
                     else
-                    { 
-                       returnValue = JsonConvert.DeserializeObject(l2Cache.Item2, returnType);
+                    {
+                        returnValue = serializer.Deserialize(l2Cache.Item2, returnType); //JsonConvert.DeserializeObject(l2Cache.Item2, returnType);
                     }
                 }
                 return returnValue as T;
@@ -92,7 +96,7 @@ namespace Surging.Core.System.Intercept
             }
         }
 
-        private  static void SetCache(ICacheProvider cacheProvider, string key, object value, long? numOfMinutes)
+        private static void SetCache(ICacheProvider cacheProvider, string key, object value, long? numOfMinutes)
         {
             if (numOfMinutes.HasValue)
             {

@@ -16,11 +16,18 @@ namespace Surging.Core.System.Intercept
             var attribute =
                  invocation.Attributes.Where(p => p is InterceptMethodAttribute)
                  .Select(p => p as InterceptMethodAttribute).FirstOrDefault();
-            var cacheKey = invocation.CacheKey == null ? attribute.Key :
-                string.Format(attribute.Key ?? "", invocation.CacheKey);
-            var l2CacheKey = invocation.CacheKey == null ? attribute.L2Key :
-                 string.Format(attribute.L2Key ?? "", invocation.CacheKey);
-            await CacheIntercept(attribute, cacheKey, invocation, l2CacheKey,attribute.EnableL2Cache);
+            if (attribute != null)
+            {
+                var cacheKey = invocation.CacheKey == null ? attribute.Key :
+                    string.Format(attribute.Key ?? "", invocation.CacheKey);
+                var l2CacheKey = invocation.CacheKey == null ? attribute.L2Key :
+                     string.Format(attribute.L2Key ?? "", invocation.CacheKey);
+                await CacheIntercept(attribute, cacheKey, invocation, l2CacheKey, attribute.EnableL2Cache);
+            }
+            else {
+                await invocation.Proceed();
+            }
+            
         }
 
         private async Task CacheIntercept(InterceptMethodAttribute attribute, string key, ICacheInvocation invocation,string l2Key,bool enableL2Cache)
