@@ -137,6 +137,16 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             await _serviceRouteManager.SetRoutesAsync(addressDescriptors);
         }
 
+        public async ValueTask<ServiceRoute> GetRouteByPathOrPathRegex(string path)
+        {
+            var route = await GetRouteByPath(path);
+            if (route == null) 
+            {
+                route = await GetRouteByPathRegex(path);
+            }
+            return route;
+        }
+
         #region 私有方法
         private static string GetCacheKey(ServiceDescriptor descriptor)
         {

@@ -53,7 +53,7 @@ namespace Surging.Core.KestrelHttpServer
                 ?? HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()))) as string;
             if (serviceRoute == null)
             {
-                serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
+                serviceRoute = await _serviceRouteProvider.GetRouteByPathOrPathRegex(path);
             }
             IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key, p => (object)p.Value.ToString());
             object serviceKey = null;
@@ -149,7 +149,7 @@ namespace Surging.Core.KestrelHttpServer
             foreach (var filter in filters)
             {
                 var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
-                var serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
+                var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrPathRegex(path);
                 if (serviceRoute == null) serviceRoute = await _serviceRouteProvider.GetLocalRouteByPathRegex(path);
                 context.Items.Add("route", serviceRoute);
                 var filterContext = new AuthorizationFilterContext

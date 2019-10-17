@@ -52,7 +52,11 @@ namespace Surging.ApiGateway.Controllers
             ServiceResult<object> result = ServiceResult<object>.Create(false, null);
             path = String.Compare(path.ToLower(), GateWayAppConfig.TokenEndpointPath, true) == 0 ?
               GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
-            var route = await _serviceRouteProvider.GetRouteByPathRegex(path);
+            var route = await _serviceRouteProvider.GetRouteByPath(path);
+            if (route == null) 
+            {
+                await _serviceRouteProvider.GetRouteByPathOrPathRegex(path);
+            }
             var httpMethods = route.ServiceDescriptor.HttpMethod();
             if (!string.IsNullOrEmpty(httpMethods) &&
                 !httpMethods.Contains(Request.Method))

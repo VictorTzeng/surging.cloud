@@ -38,6 +38,8 @@ namespace Surging.Core.CPlatform.Routing
         /// <returns></returns>
         Task RegisterRoutes(decimal processorTime);
 
-        ValueTask<ServiceRoute> GetRouteByPathRegex(string path);
+        ValueTask<ServiceRoute> GetRouteByPathOrPathRegex(string path);
+
+       // ValueTask<ServiceRoute> GetRouteByPathOrPathRegex(string path);
     }
 }
