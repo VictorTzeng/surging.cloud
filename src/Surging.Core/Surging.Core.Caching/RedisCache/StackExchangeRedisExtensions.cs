@@ -12,18 +12,26 @@ namespace Surging.Core.Caching.RedisCache
     public static class StackExchangeRedisExtensions
     {
         public static T Get<T>(this IDatabase cache, string key)
-        { 
+        {
             return Deserialize<T>(cache.StringGet(key));
         }
 
         public static void Remove(this IDatabase cache, string key)
-        { 
-              cache.KeyDelete(key);
+        {
+            cache.KeyDelete(key);
+            if (key.Contains("*"))
+            {
+                cache.ScriptEvaluate(@" local keys = redis.call('keys', ARGV[1]) 
+                for i=1,#keys,5000 do 
+                redis.call('del', unpack(keys, i, math.min(i+4999, #keys)))
+                end", values: new RedisValue[] { key });
+            }
+
         }
 
         public static async Task RemoveAsync(this IDatabase cache, string key)
         {
-              await cache.KeyDeleteAsync(key);
+            await cache.KeyDeleteAsync(key);
         }
 
         public static async Task<IDictionary<string, T>> GetManyAsync<T>(this IDatabase cache, IEnumerable<string> cacheKeys)
@@ -31,11 +39,11 @@ namespace Surging.Core.Caching.RedisCache
             var arrayKeys = cacheKeys.ToArray();
             var result = new Dictionary<string, T>();
             var keys = new RedisKey[cacheKeys.Count()];
-            for(var i=0;i< arrayKeys.Count();i++)
+            for (var i = 0; i < arrayKeys.Count(); i++)
             {
                 keys[i] = arrayKeys[i];
             }
-           var values= await cache.StringGetAsync(keys);
+            var values = await cache.StringGetAsync(keys);
             for (var i = 0; i < values.Length; i++)
             {
                 result.Add(keys[i], Deserialize<T>(values[i]));
@@ -52,7 +60,7 @@ namespace Surging.Core.Caching.RedisCache
             {
                 keys[i] = arrayKeys[i];
             }
-            var values =  cache.StringGet(keys);
+            var values = cache.StringGet(keys);
             for (var i = 0; i < values.Length; i++)
             {
                 result.Add(keys[i], Deserialize<T>(values[i]));
@@ -61,7 +69,7 @@ namespace Surging.Core.Caching.RedisCache
         }
 
         public static async Task<T> GetAsync<T>(this IDatabase cache, string key)
-        { 
+        {
             return Deserialize<T>(await cache.StringGetAsync(key));
         }
 
@@ -82,17 +90,17 @@ namespace Surging.Core.Caching.RedisCache
 
         public static async Task SetAsync(this IDatabase cache, string key, object value)
         {
-           await cache.StringSetAsync(key, Serialize(value));
+            await cache.StringSetAsync(key, Serialize(value));
         }
 
-        public static void Set(this IDatabase cache, string key, object value,TimeSpan timeSpan)
+        public static void Set(this IDatabase cache, string key, object value, TimeSpan timeSpan)
         {
-            cache.StringSet(key, Serialize(value),timeSpan);
+            cache.StringSet(key, Serialize(value), timeSpan);
         }
 
         public static async Task SetAsync(this IDatabase cache, string key, object value, TimeSpan timeSpan)
         {
-           await cache.StringSetAsync(key, Serialize(value), timeSpan);
+            await cache.StringSetAsync(key, Serialize(value), timeSpan);
         }
 
 

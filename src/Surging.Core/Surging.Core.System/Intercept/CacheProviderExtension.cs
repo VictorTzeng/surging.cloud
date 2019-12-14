@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using Surging.Core.Caching;
-using Surging.Core.CPlatform.Cache;
+﻿using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Utilities;
 using System;
@@ -13,14 +11,14 @@ namespace Surging.Core.System.Intercept
         public static async Task<T> GetFromCacheFirst<T>(this ICacheProvider cacheProvider, string key, Func<Task<T>> getFromPersistence, Type returnType, long? storeTime = null) where T : class
         {
             var serializer = ServiceLocator.GetService<ISerializer<string>>();
-            object returnValue;
+            T returnValue = default(T);
             try
             {
                 var resultJson = cacheProvider.Get<string>(key);
                 if (string.IsNullOrEmpty(resultJson) || resultJson == "\"[]\"")
                 {
                     returnValue = await getFromPersistence();
-                    if (returnValue != null)
+                    if (returnValue != null && returnValue != "null")
                     {
                         resultJson = serializer.Serialize(returnValue);
                         if (storeTime.HasValue)
@@ -37,21 +35,21 @@ namespace Surging.Core.System.Intercept
                 }
                 else
                 {
-                    returnValue = serializer.Deserialize(resultJson, returnType);
+                    returnValue = (T)serializer.Deserialize(resultJson, returnType);
                 }
-                return returnValue as T;
+                return returnValue;
             }
             catch
             {
                 returnValue = await getFromPersistence();
-                return returnValue as T;
+                return returnValue;
             }
         }
 
         public static async Task<T> GetFromCacheFirst<T>(this ICacheProvider cacheProvider, ICacheProvider l2cacheProvider, string l2Key, string key, Func<Task<T>> getFromPersistence, Type returnType, long? storeTime = null) where T : class
         {
             var serializer = ServiceLocator.GetService<ISerializer<string>>();
-            object returnValue;
+            object returnValue = default(T);
             try
             {
                 var signJson = cacheProvider.Get<string>(key);

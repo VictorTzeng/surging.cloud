@@ -1,4 +1,4 @@
-﻿namespace Surging.Core.Domain
+﻿namespace Surging.Core.Domain.PagedAndSorted
 {
     public interface IPagedResultRequest
     {

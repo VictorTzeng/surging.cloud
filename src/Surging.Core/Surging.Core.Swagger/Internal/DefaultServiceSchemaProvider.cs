@@ -30,6 +30,18 @@ namespace Surging.Core.Swagger.Internal
                 if (File.Exists(path))
                     result.Add(path);
             }
+            var annotationxmldir = AppConfig.SwaggerConfig.Options?.AnnotationXmlDir;
+            if (!string.IsNullOrEmpty(annotationxmldir) && Directory.Exists(annotationxmldir)) 
+            {
+                var annotationxmls = Directory.GetFiles(annotationxmldir, "*.xml");
+                if (annotationxmls.Any()) 
+                {
+                    foreach (var annotationxml in annotationxmls) 
+                    {
+                        result.Add(annotationxml);
+                    }
+                }
+            }
             return result;
         }
     }

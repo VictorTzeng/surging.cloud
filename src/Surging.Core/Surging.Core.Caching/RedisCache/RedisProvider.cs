@@ -6,6 +6,7 @@ using Surging.Core.CPlatform.Cache;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +22,7 @@ namespace Surging.Core.Caching.RedisCache
         private string _keySuffix;
         private Lazy<int> _connectTimeout;
         private readonly Lazy<ICacheClient<IDatabase>> _cacheClient;
+        private readonly Lazy<ICacheClient<IServer>> _cacheServer;
         private readonly IAddressResolver addressResolver;
         #endregion
 
@@ -41,9 +43,13 @@ namespace Surging.Core.Caching.RedisCache
             {
                 addressResolver = CacheContainer.GetService<IAddressResolver>();
                 _cacheClient = new Lazy<ICacheClient<IDatabase>>(() => CacheContainer.GetService<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString()));
+                _cacheServer = new Lazy<ICacheClient<IServer>>(() => CacheContainer.GetService<ICacheClient<IServer>>(CacheTargetType.Redis.ToString()));
             }
             else
+            {
                 _cacheClient = new Lazy<ICacheClient<IDatabase>>(() => CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString()));
+                _cacheServer = new Lazy<ICacheClient<IServer>>(() => CacheContainer.GetService<ICacheClient<IServer>>(CacheTargetType.Redis.ToString()));
+            }
         }
 
         public RedisProvider()
@@ -353,7 +359,7 @@ namespace Surging.Core.Caching.RedisCache
         public void Remove(string key)
         {
             var node = GetRedisNode(key);
-            var redis = GetRedisClient(new RedisEndpoint()
+            var redisEndpoint = new RedisEndpoint()
             {
                 DbIndex = int.Parse(node.Db),
                 Host = node.Host,
@@ -361,8 +367,22 @@ namespace Surging.Core.Caching.RedisCache
                 Port = int.Parse(node.Port),
                 MinSize = int.Parse(node.MinSize),
                 MaxSize = int.Parse(node.MaxSize),
-            });
-            redis.Remove(GetKeySuffix(key));
+            };
+            var redis = GetRedisClient(redisEndpoint);
+
+            var redisServer = GetRedisServer(redisEndpoint);
+
+            var redisKey = GetKeySuffix(key);
+            if (key.Contains("*"))
+            {
+                var keys = redisServer.Keys(database: redisEndpoint.DbIndex, pattern: redisKey).ToArray();
+                redis.KeyDeleteAsync(keys);
+            }
+            else 
+            {
+                redis.Remove(redisKey);
+            }
+           
 
         }
 
@@ -419,6 +439,13 @@ namespace Surging.Core.Caching.RedisCache
         #endregion
 
         #region 私有方法
+
+        private IServer GetRedisServer(CacheEndpoint info)
+        {
+            return
+                _cacheServer.Value
+                    .GetServer(info, ConnectTimeout);
+        }
 
         private IDatabase GetRedisClient(CacheEndpoint info)
         {

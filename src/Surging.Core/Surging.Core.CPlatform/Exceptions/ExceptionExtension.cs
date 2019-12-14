@@ -14,7 +14,7 @@ namespace Surging.Core.CPlatform.Exceptions
 
             var message = exception.Message;
             if ((AppConfig.ServerOptions.Environment == RuntimeEnvironment.Development 
-                && (exception is BusinessException || exception.InnerException is BusinessException))                
+                && !(exception is BusinessException || exception.InnerException is BusinessException))                
                 || AppConfig.ServerOptions.ForceDisplayStackTrace)
             {
                 message += Environment.NewLine + " 堆栈信息:" + exception.StackTrace;

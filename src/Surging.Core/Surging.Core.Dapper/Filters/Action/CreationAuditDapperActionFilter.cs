@@ -24,13 +24,12 @@ namespace Surging.Core.Dapper.Filters.Action
             var loginUser = NullSurgingSession.Instance;
             if (typeof(ICreationAudited).IsAssignableFrom(typeof(TEntity)) && loginUser != null)
             {
-
                 var record = entity as ICreationAudited;
-                if (record.CreatorUserId == null)
-                {
-                    record.CreatorUserId = loginUser.UserId;
-                }
-
+                record.CreatorUserId = loginUser.UserId;
+            }
+            if (typeof(IElasticSearch).IsAssignableFrom(typeof(TEntity))) 
+            {
+                
             }
         }
     }

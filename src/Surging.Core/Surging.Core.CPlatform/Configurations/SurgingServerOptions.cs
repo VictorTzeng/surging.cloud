@@ -59,5 +59,9 @@ namespace Surging.Core.CPlatform.Configurations
         public bool IsCompensationRegisterRoutes { get; set; } = true;
 
         public int CompensationRegisterRoutesCount { get; set; } = 2;
+
+        public int HealthCheckTimeout { get; set; } = 1000;
+
+        public int UnhealthyTimes { get; set; } = 6;
     }
 }

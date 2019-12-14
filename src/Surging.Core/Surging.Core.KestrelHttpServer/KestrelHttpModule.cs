@@ -13,6 +13,7 @@ using Surging.Core.KestrelHttpServer.Diagnostics;
 using Surging.Core.KestrelHttpServer.Extensions;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
+using System;
 using System.Net;
 
 namespace Surging.Core.KestrelHttpServer
@@ -22,6 +23,7 @@ namespace Surging.Core.KestrelHttpServer
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", AppConfig.ServerOptions.Environment.ToString());
         }
 
         public virtual void Initialize(ApplicationInitializationContext builder)

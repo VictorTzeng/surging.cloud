@@ -5,6 +5,7 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Template;
@@ -166,7 +167,11 @@ namespace Surging.Core.Protocol.Http
                 Task.Run(async () =>
                 {
                     var parameters = GetParameters(HttpUtility.UrlDecode(msg.Uri), out string path);
-                    var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrPathRegex(path);
+                    var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrRegexPath(path);
+                    if (serviceRoute == null)
+                    {
+                        throw new CPlatformException("Routing path not found", StatusCode.Http404EndpointStatusCode);
+                    }
                     parameters.Remove("servicekey", out object serviceKey);
                     if (data.Length > 0)
                         parameters = _serializer.Deserialize<string, IDictionary<string, object>>(System.Text.Encoding.ASCII.GetString(data)) ?? new Dictionary<string, object>();

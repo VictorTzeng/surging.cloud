@@ -61,6 +61,10 @@ namespace Surging.Core.Swagger
         public string IngressName { get; set; }
 
         public IEnumerable<MapRoutePath> MapRoutePaths { get; set; }
+
+        public bool IsOnlyGenerateLocalHostDocs { get; set; }
+
+        public string AnnotationXmlDir { get; set; }
     }
 
     public class MapRoutePath
@@ -86,6 +90,8 @@ namespace Surging.Core.Swagger
         public string TermsOfService { get; set; }
 
         public Contact Contact { get; set; }
+
+        public bool IsUsingTerminal { get; set; }
 
         public License License { get; set; }
 

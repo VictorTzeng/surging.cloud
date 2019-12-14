@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <PackageId>$(PackagePrefix).CPlatform</PackageId>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <PackageReleaseNotes>1.multiple register center cluster
+    <TargetFrameworks>netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
+     <PackageReleaseNotes>1.multiple register center cluster
 2. fix bug</PackageReleaseNotes>
   </PropertyGroup>
 

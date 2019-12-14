@@ -44,10 +44,6 @@ namespace Surging.Core.Dapper.Manager
 
         protected virtual void UnitOfWork(Action<DbConnection, DbTransaction> action, DbConnection conn)
         {
-            if (conn.State != ConnectionState.Open) 
-            {
-                conn.Open();
-            }
             var trans = conn.BeginTransaction();
             try
             {
@@ -72,7 +68,6 @@ namespace Surging.Core.Dapper.Manager
             {
                 conn.Open();
             }
-
             var trans = conn.BeginTransaction();
             try
             {

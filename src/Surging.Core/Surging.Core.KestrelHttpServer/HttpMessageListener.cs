@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Template;
@@ -51,9 +52,15 @@ namespace Surging.Core.KestrelHttpServer
 
             var path = (context.Items["path"]
                 ?? HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()))) as string;
+           
             if (serviceRoute == null)
             {
-                serviceRoute = await _serviceRouteProvider.GetRouteByPathOrPathRegex(path);
+                var route = await _serviceRouteProvider.GetRouteByPathOrRegexPath(path);
+                if (route == null)
+                {
+                    throw new CPlatformException("Routing path not found", StatusCode.Http404EndpointStatusCode);
+                }
+                serviceRoute = route;
             }
             IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key, p => (object)p.Value.ToString());
             object serviceKey = null;
@@ -149,8 +156,11 @@ namespace Surging.Core.KestrelHttpServer
             foreach (var filter in filters)
             {
                 var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
-                var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrPathRegex(path);
-                if (serviceRoute == null) serviceRoute = await _serviceRouteProvider.GetLocalRouteByPathRegex(path);
+                var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrRegexPath(path);
+                //if (serviceRoute == null) 
+                //{
+                //    throw new CPlatformException("Routing path not found", StatusCode.Http404EndpointStatusCode);
+                //}
                 context.Items.Add("route", serviceRoute);
                 var filterContext = new AuthorizationFilterContext
                 {

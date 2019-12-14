@@ -1,18 +1,17 @@
 <Project>
-   <Import Project="..\version.props" />
-  <PropertyGroup>
+  <Import Project="..\version.props" />
+  <PropertyGroup>    
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <PackageIconUrl>https://raw.githubusercontent.com/surging-cloud/surging/develop/logo.jpg</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/surging-cloud/surging</PackageProjectUrl>
-    <License>https://raw.githubusercontent.com/surging-cloud/surging/develop/LICENSE</License>
+    <PackageIconUrl>https://code.jingshonline.net/lawfirm-microservices/surging/raw/9940b690ce0d50cb4a41c71f4b44626aada40a64/logo.jpg</PackageIconUrl>
+    <PackageProjectUrl>https://code.jingshonline.net/lawfirm-microservices/surging</PackageProjectUrl>
+    <PackageLicenseUrl>https://code.jingshonline.net/lawfirm-microservices/surging/raw/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/surging-cloud/surging.git</RepositoryUrl>
-	  <Company>Surging Cloud</Company>
-	  <Authors>Surging Cloud</Authors>
+    <RepositoryUrl>https://code.jingshonline.net/lawfirm-microservices/surging.git</RepositoryUrl>
+	  <Company>Jingshonline</Company>
+	  <Authors>Jingshonline</Authors>
     <Product>Surging Micro Service Framework</Product>
-    <Copyright>Copyright © surging-cloud All Rights Reserved.</Copyright>
+    <Copyright>Copyright © Jingshonline All Rights Reserved.</Copyright>
 	  <PackageTags>surging;microservice</PackageTags>
-    <PackagePrefix>Surging.Cloud</PackagePrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release' ">

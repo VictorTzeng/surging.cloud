@@ -15,6 +15,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         {
             IsWaitExecution = true;
             EnableAuthorization = true;
+            IsTokenPoint = false;
         }
 
         /// <summary>
@@ -47,6 +48,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
 
         public bool AllowPermission { get; set; }
 
+        public bool IsTokenPoint { get; set; } 
+
         #region Overrides of DescriptorAttribute
 
         /// <summary>
@@ -62,7 +65,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 .Director(Director)
                 .GroupName(Name)
                 .Date(Date)
-                .AllowPermission(AllowPermission);
+                .AllowPermission(AllowPermission)
+                .IsTokenPoint(IsTokenPoint);
         }
 
         #endregion Overrides of ServiceDescriptorAttribute

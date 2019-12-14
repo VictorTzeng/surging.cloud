@@ -40,9 +40,12 @@ namespace Surging.Core.CPlatform.Module
             {
                 try
                 {
-                    Type[] types = { typeof(SystemModule), typeof(BusinessModule), typeof(EnginePartModule), typeof(AbstractModule) }; 
+                    Type[] types = { typeof(SystemModule), typeof(BusinessModule), typeof(EnginePartModule), typeof(AbstractModule) };
                     if (p.Enable)
-                            p.Initialize(new AppModuleContext(_modules, _virtualPaths, _serviceProvoider));
+                    {
+                        p.Initialize(new AppModuleContext(_modules, _virtualPaths, _serviceProvoider));
+                    }
+                    
                     var type = p.GetType().BaseType;
                     if (types.Any(ty => ty == type))
                         p.Dispose();
@@ -57,6 +60,7 @@ namespace Surging.Core.CPlatform.Module
                     throw ex;
                 }
             });
+
             WriteLog();
         }
 

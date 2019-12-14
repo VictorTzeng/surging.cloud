@@ -7,6 +7,8 @@ namespace Surging.Core.Dapper
 
         public string ConnectionString { get; set; }
 
+        public bool UseElasicSearchModule { get; internal set; }
+
         public static DbSetting Instance { get; internal set; }
     }
 }

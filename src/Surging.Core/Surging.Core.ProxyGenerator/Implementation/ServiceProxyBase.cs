@@ -88,12 +88,33 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     }
                 }
             }
-            if (_cacheInterceptor!=null && command.RequestCacheEnabled)
+            if (_cacheInterceptor !=null && command.RequestCacheEnabled)
             {
                 invocation = GetCacheInvocation(parameters, serviceId, typeof(T));
-                var interceptReuslt = await Intercept(_cacheInterceptor, invocation);
-                message = interceptReuslt.Item1;
-                result = interceptReuslt.Item2 == null ? default(T) : interceptReuslt.Item2;
+                if (invocation != null)
+                {
+                    var interceptReuslt = await Intercept(_cacheInterceptor, invocation);
+                    message = interceptReuslt.Item1;
+                    result = interceptReuslt.Item2 == null ? default(T) : interceptReuslt.Item2;
+                }
+                else 
+                {
+                    message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
+                    if (message == null)
+                    {
+                        if (command.FallBackName != null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
+                        {
+                            var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
+                            return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
+                        }
+                        else
+                        {
+                            var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
+                            return await invoker.Invoke<T>(parameters, serviceId, _serviceKey, typeof(T) == UtilityType.ObjectType);
+                        }
+                    }
+                }
+           
             }
             if (existsInterceptor)
             {
@@ -112,38 +133,12 @@ namespace Surging.Core.ProxyGenerator.Implementation
             //}
             if (message != null)
             {
-                if (message.StatusCode == StatusCode.Success)
-                {
-                    result = _typeConvertibleService.Convert(message.Result, typeof(T));
-                }
-                else
-                {
-                    switch (message.StatusCode)
-                    {
-                        case StatusCode.BusinessError:
-                            throw new BusinessException(message.ExceptionMessage);
-                        case StatusCode.CommunicationError:
-                            throw new CommunicationException(message.ExceptionMessage);
-                        case StatusCode.RequestError:
-                        case StatusCode.CPlatformError:
-                        case StatusCode.UnKnownError:
-                            throw new CPlatformException(message.ExceptionMessage, message.StatusCode);
-                        case StatusCode.DataAccessError:
-                            throw new DataAccessException(message.ExceptionMessage);
-                        case StatusCode.UnAuthentication:
-                            throw new UnAuthenticationException(message.ExceptionMessage);
-                        case StatusCode.UnAuthorized:
-                            throw new UnAuthorizedException(message.ExceptionMessage);
-                        case StatusCode.UserFriendly:
-                            throw new UserFriendlyException(message.ExceptionMessage);
-                        case StatusCode.ValidateError:
-                            throw new ValidateException(message.ExceptionMessage);
-                    }
-                    throw new CPlatformException(message.ExceptionMessage, message.StatusCode);
-                }
+                result = GetInvokeResult<T>(message);
             }
             return (T)result;
         }
+
+       
 
         public async Task<object> CallInvoke(IInvocation invocation)
         {
@@ -159,17 +154,19 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
                 if (command.FallBackName != null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
                 {
+                    // :todo fix return type
                     var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
-                    return await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
+                    return await invoker.Invoke(parameters, invocation.ReturnType, serviceId, _serviceKey);
                 }
                 else
                 {
+                    // :todo fix return type
                     var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                    return await invoker.Invoke<object>(parameters, serviceId, _serviceKey, true);
+                    return await invoker.Invoke(parameters, invocation.ReturnType, serviceId, _serviceKey, true);
                 }
             }
             if (type == typeof(Task)) return message;
-            return _typeConvertibleService.Convert(message.Result, type);
+            return GetInvokeResult(message,invocation.ReturnType);            
         }
 
         /// <summary>
@@ -228,6 +225,89 @@ namespace Surging.Core.ProxyGenerator.Implementation
         {
             var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
             return invocation.GetCacheInvocation(this, parameters, serviceId, returnType);
+        }
+
+        private object GetInvokeResult<T>(RemoteInvokeResultMessage message)
+        {
+            object result = default(T);
+            if (message.StatusCode == StatusCode.Success)
+            {
+                if (message.Result != null) 
+                {
+                    result = _typeConvertibleService.Convert(message.Result, typeof(T));
+                }                
+            }
+            else
+            {
+                switch (message.StatusCode)
+                {
+                    case StatusCode.BusinessError:
+                        throw new BusinessException(message.ExceptionMessage);
+                    case StatusCode.CommunicationError:
+                        throw new CommunicationException(message.ExceptionMessage);
+                    case StatusCode.RequestError:
+                    case StatusCode.CPlatformError:
+                    case StatusCode.UnKnownError:
+                        throw new CPlatformException(message.ExceptionMessage, message.StatusCode);
+                    case StatusCode.DataAccessError:
+                        throw new DataAccessException(message.ExceptionMessage);
+                    case StatusCode.UnAuthentication:
+                        throw new UnAuthenticationException(message.ExceptionMessage);
+                    case StatusCode.UnAuthorized:
+                        throw new UnAuthorizedException(message.ExceptionMessage);
+                    case StatusCode.UserFriendly:
+                        throw new UserFriendlyException(message.ExceptionMessage);
+                    case StatusCode.ValidateError:
+                        throw new ValidateException(message.ExceptionMessage);
+                }
+                throw new CPlatformException(message.ExceptionMessage, message.StatusCode);
+            }
+
+            return result;
+        }
+
+        private object GetInvokeResult(RemoteInvokeResultMessage message, Type returnType)
+        {
+            object result;
+            if (message.StatusCode == StatusCode.Success)
+            {
+                if (message.Result != null)
+                {
+                    result = _typeConvertibleService.Convert(message.Result, returnType);
+                }
+                else 
+                {
+                    result = message.Result;
+                }
+               
+            }
+            else
+            {
+                switch (message.StatusCode)
+                {
+                    case StatusCode.BusinessError:
+                        throw new BusinessException(message.ExceptionMessage);
+                    case StatusCode.CommunicationError:
+                        throw new CommunicationException(message.ExceptionMessage);
+                    case StatusCode.RequestError:
+                    case StatusCode.CPlatformError:
+                    case StatusCode.UnKnownError:
+                        throw new CPlatformException(message.ExceptionMessage, message.StatusCode);
+                    case StatusCode.DataAccessError:
+                        throw new DataAccessException(message.ExceptionMessage);
+                    case StatusCode.UnAuthentication:
+                        throw new UnAuthenticationException(message.ExceptionMessage);
+                    case StatusCode.UnAuthorized:
+                        throw new UnAuthorizedException(message.ExceptionMessage);
+                    case StatusCode.UserFriendly:
+                        throw new UserFriendlyException(message.ExceptionMessage);
+                    case StatusCode.ValidateError:
+                        throw new ValidateException(message.ExceptionMessage);
+                }
+                throw new CPlatformException(message.ExceptionMessage, message.StatusCode);
+            }
+
+            return result;
         }
 
         #endregion Protected Method

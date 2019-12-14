@@ -84,7 +84,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                             _logger.LogDebug("当前服务{serviceId}-{serviceKey}当前不可用,请稍后重试");
                         }
                         var breakeSeconds = Math.Round((command.BreakeSleepWindowInMilliseconds - intervalSeconds * 1000) / 1000,0);
-                        return new RemoteInvokeResultMessage() { ExceptionMessage = $"当前服务{serviceId}-{serviceKey}当前不可用,请稍后{breakeSeconds}s后重试", StatusCode = StatusCode.ServiceUnavailability };
+                        return new RemoteInvokeResultMessage() { ExceptionMessage = $"服务{serviceId}-{serviceKey}当前不可用,请稍后{breakeSeconds}s后重试,请检查您的输入参数是否正确", StatusCode = StatusCode.ServiceUnavailability };
                         //return null；
                     }
                 }

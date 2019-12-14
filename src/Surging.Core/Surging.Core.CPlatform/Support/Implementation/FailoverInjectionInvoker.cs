@@ -67,5 +67,37 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
             return default(T);
         }
+
+        public async Task<object> Invoke(IDictionary<string, object> parameters, Type returnType, string serviceId, string serviceKey, bool decodeJOject)
+        {
+            var vt = _serviceCommandProvider.GetCommand(serviceId);
+            var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
+            var injectionResult = await _serviceCommandProvider.Run(command.Injection, command.InjectionNamespaces);
+            if (injectionResult is Boolean)
+            {
+                if ((bool)injectionResult)
+                {
+                    var entries = _serviceEntryManager.GetEntries().ToList();
+                    var entry = entries.Where(p => p.Descriptor.Id == serviceId).FirstOrDefault();
+                    var message = await entry.Func(serviceKey, parameters);
+                    object result = null;
+                    if (message == null && message is Task<object>)
+                    {
+                        result = _typeConvertibleService.Convert((message as Task<object>).Result, returnType);
+                    }
+                    return result;
+                }
+            }
+            else
+            {
+                var result = injectionResult;
+                if (injectionResult is Task<object>)
+                {
+                    result = _typeConvertibleService.Convert((injectionResult as Task<object>).Result, returnType);
+                }
+                return result;
+            }
+            return null;
+        }
     }
 }

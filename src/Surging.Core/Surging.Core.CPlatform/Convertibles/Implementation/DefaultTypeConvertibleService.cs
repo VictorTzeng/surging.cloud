@@ -41,12 +41,15 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
         /// <param name="conversionType">转换的类型。</param>
         /// <returns>转换之后的类型，如果无法转换则返回null。</returns>
         public object Convert(object instance, Type conversionType)
-        {
-            if (instance == null)
-                throw new ArgumentNullException(nameof(instance));
+        {         
             if (conversionType == null)
                 throw new ArgumentNullException(nameof(conversionType));
-
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+            if (instance == null) 
+            {
+                return null;
+            }
             if (conversionType.GetTypeInfo().IsInstanceOfType(instance))
                 return instance;
 

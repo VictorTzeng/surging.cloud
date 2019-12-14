@@ -11,6 +11,7 @@ using System.Linq;
 using Surging.Core.Caching;
 using System.Text.RegularExpressions;
 using Surging.Core.CPlatform.Cache;
+using Surging.Core.CPlatform.Exceptions;
 
 namespace Surging.Core.ApiGateWay.OAuth
 {
@@ -42,7 +43,11 @@ namespace Surging.Core.ApiGateWay.OAuth
                 var jwtHeader = JsonConvert.SerializeObject(new JWTSecureDataHeader() { TimeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") });
                 var base64Payload = ConverBase64String(JsonConvert.SerializeObject(payload));
                 var encodedString = $"{ConverBase64String(jwtHeader)}.{base64Payload}";
-                var route = await _serviceRouteProvider.GetRouteByPath(AppConfig.AuthenticationRoutePath);
+                var route = await _serviceRouteProvider.GetRouteByPathOrRegexPath(AppConfig.AuthenticationRoutePath);
+                if (route == null) 
+                {
+                    throw new CPlatformException("Routing path not found", StatusCode.Http404EndpointStatusCode);
+                }
                 var signature = HMACSHA256(encodedString, route.ServiceDescriptor.Token);
                 result= $"{encodedString}.{signature}";
                 _cacheProvider.Add(base64Payload, result,AppConfig.AccessTokenExpireTimeSpan);

@@ -1,6 +1,8 @@
-﻿using Surging.Core.CPlatform.Runtime.Session;
+﻿using Nest;
+using Surging.Core.CPlatform.Runtime.Session;
 using Surging.Core.Domain.Entities;
 using Surging.Core.Domain.Entities.Auditing;
+using Surging.Core.ElasticSearch;
 using System;
 
 namespace Surging.Core.Dapper.Filters.Action
@@ -14,13 +16,14 @@ namespace Surging.Core.Dapper.Filters.Action
             {
 
                 var record = entity as IModificationAudited;
-                if (record.LastModifierUserId == null)
-                {
-                    record.LastModifierUserId = loginUser.UserId;
-                }
+                record.LastModifierUserId = loginUser.UserId;
                 record.LastModificationTime = DateTime.Now;
 
             }
+            //if (typeof(IElasticSearch).IsAssignableFrom(typeof(TEntity)))
+            //{
+            //    ((IElasticSearch)entity).Version = ((IElasticSearch)entity).Version + 1;
+            //}
         }
     }
 }

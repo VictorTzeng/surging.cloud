@@ -113,22 +113,28 @@ namespace Surging.Core.KestrelHttpServer
             try {
                 var resultData = await _serviceProxyProvider.Invoke<object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
                 resultMessage.Entity = HandleResultData(resultData);
-                resultMessage.IsSucceed = resultMessage.Entity != default;
+                resultMessage.IsSucceed = true;
                 resultMessage.StatusCode = resultMessage.IsSucceed ? StatusCode.Success : StatusCode.RequestError;
             }
             catch (Exception ex)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(ex, "执行远程调用逻辑时候发生了错误。");
-                resultMessage = new HttpResultMessage<object> { Entity = null, Message = ex.GetExceptionMessage(), StatusCode = ex.GetGetExceptionStatusCode() };
+                resultMessage = new HttpResultMessage<object> { Entity = null, Message = ex.GetExceptionMessage(), IsSucceed = false, StatusCode = ex.GetGetExceptionStatusCode() };
             }
             return resultMessage;
         }
 
         private object HandleResultData(object resultData)
         {
+            if ( resultData == null || resultData == "null")
+            {
+                return null;
+            }
+
             if (resultData.GetType() == typeof(string)) {
                 var resultDataStr = (string)resultData;
+               
                 if (resultDataStr.IsValidJson()) {
                     var dataObj = _serializer.Deserialize(resultDataStr, typeof(object), true);
                     return dataObj;

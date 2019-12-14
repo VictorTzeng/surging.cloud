@@ -163,11 +163,52 @@ namespace Surging.Core.ApiGateWay
 
                 return Configuration["CacheMode"] ?? _cacheMode;
             }
-           set
+            set
             {
                 _cacheMode = value;
             }
-           
+
+        }
+
+        private static bool _isUsingTerminal = false;
+
+        public static bool IsUsingTerminal { 
+            get 
+            {
+                if (Configuration == null)
+                    return _isUsingTerminal;
+                if (Configuration["IsUsingTerminal"] != null)
+                {
+                    return Convert.ToBoolean(Configuration["IsUsingTerminal"]);
+                }
+                else 
+                {
+                    return _isUsingTerminal;
+                }
+               
+            }
+            set 
+            {
+                _isUsingTerminal = value;
+            }
+        }
+
+        private static string _terminals = "Dashborad,App";
+
+        public static string Terminals 
+        { 
+            get 
+            {
+                if (Configuration == null)
+                    return string.Empty;
+                return Configuration["Terminals"] ?? _terminals;
+
+
+            }
+            set
+            {
+                _terminals = value;
+            }
         }
     }
 }

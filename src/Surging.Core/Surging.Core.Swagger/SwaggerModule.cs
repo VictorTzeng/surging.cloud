@@ -40,7 +40,15 @@ namespace Surging.Core.Swagger
                 {
                     var areaName = AppConfig.SwaggerConfig.Options?.IngressName;
                     c.SwaggerEndpoint($"../swagger/{info.Version}/swagger.json", info.Title, areaName);
-                    c.SwaggerEndpoint(_serviceEntryProvider.GetALLEntries(), areaName);
+                    var isOnlyGenerateLocalHostDocs = AppConfig.SwaggerConfig.Options?.IsOnlyGenerateLocalHostDocs;
+                    if (isOnlyGenerateLocalHostDocs != null && isOnlyGenerateLocalHostDocs.Value)
+                    {
+                        c.SwaggerEndpoint(_serviceEntryProvider.GetEntries(), areaName);
+                    }
+                    else {
+                        c.SwaggerEndpoint(_serviceEntryProvider.GetALLEntries(), areaName);
+                    }
+                   
                 });
             }
         }
@@ -55,8 +63,7 @@ namespace Surging.Core.Swagger
             {
                 serviceCollection.AddSwaggerGen(options =>
                 {
-                    if (context.Modules.Any(p => p.ModuleName == "StageModule" && p.Enable))
-                    {
+                    if (context.Modules.Any(p => p.ModuleName == "StageModule" && p.Enable)) {
                         options.OperationFilter<AddAuthorizationOperationFilter>();
                     }
                     options.SwaggerDoc(info.Version, info);

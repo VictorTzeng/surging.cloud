@@ -1,4 +1,5 @@
-﻿using Surging.Core.ProxyGenerator.Implementation;
+﻿using Surging.Core.CPlatform.Messages;
+using Surging.Core.ProxyGenerator.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 {
     public class ActionInvocation : AbstractInvocation
-    { 
+    {
         protected ActionInvocation(
              IDictionary<string, object> arguments,
            string serviceId,
@@ -24,8 +25,12 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
         {
             try
             {
-                if(_returnValue ==null)
-                _returnValue = await (Proxy as ServiceProxyBase).CallInvoke(this);
+                if (_returnValue == null)
+                    // _returnValue = await (Proxy as ServiceProxyBase).CallInvoke(this);
+                    _returnValue = new RemoteInvokeResultMessage()
+                    {
+                        Result = await (Proxy as ServiceProxyBase).CallInvoke(this),
+                    };
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 ﻿using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.DependencyResolution;
+using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Routing;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
         public  async Task<T> Invoke<T>(IDictionary<string, object> parameters, string routePath)
         {
-           var serviceRoute= await _serviceRouteProvider.GetRouteByPathOrPathRegex(routePath.ToLower());
+            var serviceRoute = await LocationServiceRoute(routePath);
             T result = default(T);
             if (parameters.ContainsKey("serviceKey"))
             {
@@ -27,18 +28,18 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 var proxy = ServiceResolver.Current.GetService<RemoteServiceProxy>(serviceKey);
                 if (proxy == null)
                 {
-                     proxy = new RemoteServiceProxy(serviceKey.ToString(), _serviceProvider);
+                    proxy = new RemoteServiceProxy(serviceKey.ToString(), _serviceProvider);
                     ServiceResolver.Current.Register(serviceKey.ToString(), proxy);
                 }
                 result = await proxy.Invoke<T>(parameters, serviceRoute.ServiceDescriptor.Id);
-                    
+
             }
             else
             {
                 var proxy = ServiceResolver.Current.GetService<RemoteServiceProxy>();
                 if (proxy == null)
                 {
-                     proxy = new RemoteServiceProxy(null, _serviceProvider);
+                    proxy = new RemoteServiceProxy(null, _serviceProvider);
                     ServiceResolver.Current.Register(null, proxy);
                 }
                 result = await proxy.Invoke<T>(parameters, serviceRoute.ServiceDescriptor.Id);
@@ -46,9 +47,11 @@ namespace Surging.Core.ProxyGenerator.Implementation
             return result;
         }
 
+
+
         public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string routePath, string serviceKey)
         {
-            var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrPathRegex(routePath.ToLower());
+            var serviceRoute = await LocationServiceRoute(routePath);
             T result = default(T);
             if (!string.IsNullOrEmpty(serviceKey))
             {
@@ -71,6 +74,18 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 result = await proxy.Invoke<T>(parameters, serviceRoute.ServiceDescriptor.Id);
             }
             return result;
+        }
+
+        private async Task<ServiceRoute> LocationServiceRoute(string routePath)
+        {
+            var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrRegexPath(routePath.ToLower());
+          
+            if (serviceRoute == null)
+            {
+                throw new CPlatformException($"不存在api为{routePath}的路由信息");
+            }
+
+            return serviceRoute;
         }
     }
 }

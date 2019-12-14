@@ -1,6 +1,10 @@
 ﻿using Surging.Core.Caching;
 using Surging.Core.CPlatform.Cache;
+using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Runtime.Session;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.ProxyGenerator.Interceptors;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,23 +18,65 @@ namespace Surging.Core.System.Intercept
         public override async Task Intercept(ICacheInvocation invocation)
         {
             var attribute =
-                 invocation.Attributes.Where(p => p is InterceptMethodAttribute)
-                 .Select(p => p as InterceptMethodAttribute).FirstOrDefault();
+                  invocation.Attributes.Where(p => p is InterceptMethodAttribute)
+                  .Select(p => p as InterceptMethodAttribute).FirstOrDefault();
             if (attribute != null)
             {
+                if (!attribute.Key.IsNullOrEmpty() && attribute.Key.Contains("{userId}", StringComparison.OrdinalIgnoreCase))
+                {
+                    var loginUser = NullSurgingSession.Instance;
+                    if (loginUser == null || !loginUser.UserId.HasValue)
+                    {
+                        await invocation.Proceed();
+                        return;
+                    }
+                    else
+                    {
+                        attribute.Key = attribute.Key.Replace("{userId}", loginUser.UserId.Value.ToString());
+                    }
+                }
+                if (attribute.CorrespondingKeys != null && attribute.CorrespondingKeys.Any(p => p.Contains("{userId}", StringComparison.OrdinalIgnoreCase))) 
+                {
+                    var loginUser = NullSurgingSession.Instance;
+
+                    //foreach (var key in attribute.CorrespondingKeys) 
+                    //{
+                    //    if (loginUser == null || !loginUser.UserId.HasValue)
+                    //    {
+                    //        key.Replace("{userId}", "*");
+                    //    }
+                    //    else
+                    //    {
+                    //        key.Replace("{userId}", loginUser.UserId.Value.ToString());
+                    //    }
+
+                    //}
+                    for (var i = 0; i < attribute.CorrespondingKeys.Length; i++) 
+                    {
+                        if (loginUser == null || !loginUser.UserId.HasValue)
+                        {
+                            attribute.CorrespondingKeys[i] = attribute.CorrespondingKeys[i].Replace("{userId}", "*", StringComparison.OrdinalIgnoreCase);
+                        }
+                        else 
+                        {
+                            attribute.CorrespondingKeys[i] = attribute.CorrespondingKeys[i].Replace("{userId}", loginUser.UserId.Value.ToString(), StringComparison.OrdinalIgnoreCase);
+                        }
+                    }
+                }
                 var cacheKey = invocation.CacheKey == null ? attribute.Key :
-                    string.Format(attribute.Key ?? "", invocation.CacheKey);
+                      string.Format(attribute.Key ?? "", invocation.CacheKey);
                 var l2CacheKey = invocation.CacheKey == null ? attribute.L2Key :
-                     string.Format(attribute.L2Key ?? "", invocation.CacheKey);
+                      string.Format(attribute.L2Key ?? "", invocation.CacheKey);
+
                 await CacheIntercept(attribute, cacheKey, invocation, l2CacheKey, attribute.EnableL2Cache);
             }
-            else {
+            else
+            {
                 await invocation.Proceed();
             }
-            
         }
 
-        private async Task CacheIntercept(InterceptMethodAttribute attribute, string key, ICacheInvocation invocation,string l2Key,bool enableL2Cache)
+        private async Task CacheIntercept(InterceptMethodAttribute attribute, string key, ICacheInvocation invocation, string l2Key, bool enableL2Cache)
         {
             ICacheProvider cacheProvider = null;
             switch (attribute.Mode)
@@ -48,10 +94,10 @@ namespace Surging.Core.System.Intercept
                     }
             }
             if (cacheProvider != null && !enableL2Cache) await Invoke(cacheProvider, attribute, key, invocation);
-            else if(cacheProvider != null && enableL2Cache)
+            else if (cacheProvider != null && enableL2Cache)
             {
                 var l2CacheProvider = CacheContainer.GetService<ICacheProvider>(CacheTargetType.MemoryCache.ToString());
-                if(l2CacheProvider !=null) await Invoke(cacheProvider,l2CacheProvider,l2Key, attribute, key, invocation);
+                if (l2CacheProvider != null) await Invoke(cacheProvider, l2CacheProvider, l2Key, attribute, key, invocation);
             }
         }
 
@@ -65,7 +111,15 @@ namespace Surging.Core.System.Intercept
                         var retrunValue = await cacheProvider.GetFromCacheFirst(key, async () =>
                         {
                             await invocation.Proceed();
-                            return invocation.ReturnValue;
+                            if (invocation.ReturnValue is RemoteInvokeResultMessage)
+                            {
+                                return ((RemoteInvokeResultMessage)invocation.ReturnValue).Result;
+                            }
+                            else 
+                            {
+                                return invocation.ReturnValue;
+                            }
+                           
                         }, invocation.ReturnType, attribute.Time);
                         invocation.ReturnValue = retrunValue;
                         break;
@@ -74,25 +128,34 @@ namespace Surging.Core.System.Intercept
                     {
                         await invocation.Proceed();
                         var keys = attribute.CorrespondingKeys.Select(correspondingKey => string.Format(correspondingKey, invocation.CacheKey)).ToList();
-                        keys.ForEach(cacheProvider.RemoveAsync);
+                        keys.ForEach(key => {
+                            cacheProvider.RemoveAsync(key);
+                        });
                         break;
                     }
             }
         }
 
 
-        private async Task Invoke(ICacheProvider cacheProvider, ICacheProvider l2cacheProvider,string l2Key, InterceptMethodAttribute attribute, string key, ICacheInvocation invocation)
+        private async Task Invoke(ICacheProvider cacheProvider, ICacheProvider l2cacheProvider, string l2Key, InterceptMethodAttribute attribute, string key, ICacheInvocation invocation)
         {
 
             switch (attribute.Method)
             {
                 case CachingMethod.Get:
                     {
-                        var retrunValue = await cacheProvider.GetFromCacheFirst(l2cacheProvider, l2Key,key, async () =>
-                        {
-                            await invocation.Proceed();
-                            return invocation.ReturnValue;
-                        }, invocation.ReturnType, attribute.Time);
+                        var retrunValue = await cacheProvider.GetFromCacheFirst(l2cacheProvider, l2Key, key, async () =>
+                         {
+                             await invocation.Proceed();
+                             if (invocation.ReturnValue is RemoteInvokeResultMessage)
+                             {
+                                 return ((RemoteInvokeResultMessage)invocation.ReturnValue).Result;
+                             }
+                             else
+                             {
+                                 return invocation.ReturnValue;
+                             }
+                         }, invocation.ReturnType, attribute.Time);
                         invocation.ReturnValue = retrunValue;
                         break;
                     }

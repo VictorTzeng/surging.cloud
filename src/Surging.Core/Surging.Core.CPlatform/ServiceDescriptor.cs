@@ -189,6 +189,12 @@ namespace Surging.Core.CPlatform
             descriptor.Metadatas["AllowPermission"] = allowPermission;
             return descriptor;
         }
+
+        public static ServiceDescriptor IsTokenPoint(this ServiceDescriptor descriptor, bool isTokenPoint) 
+        {
+            descriptor.Metadatas["IsTokenPoint"] = isTokenPoint;
+            return descriptor;
+        }
     }
 
     /// <summary>

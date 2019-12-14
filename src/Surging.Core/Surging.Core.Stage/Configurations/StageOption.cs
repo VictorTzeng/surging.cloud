@@ -48,5 +48,6 @@ namespace Surging.Core.Stage.Configurations
         public List<AccessSettingOption> AccessSetting { get; set; }
 
         public string HttpPorts { get;  set; }
+
     }
 }

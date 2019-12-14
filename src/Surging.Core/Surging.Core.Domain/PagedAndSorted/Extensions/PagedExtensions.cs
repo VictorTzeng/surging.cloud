@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Surging.Core.Domain
+namespace Surging.Core.Domain.PagedAndSorted.Extensions
 {
     public static class PagedExtensions
     {

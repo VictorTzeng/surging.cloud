@@ -1,7 +1,5 @@
-﻿using Surging.Core.ProxyGenerator.Interceptors.Implementation;
+﻿using Surging.Core.CPlatform.Intercept;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Surging.Core.System.Intercept
 {

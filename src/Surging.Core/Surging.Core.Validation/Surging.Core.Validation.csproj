@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
  
   <PropertyGroup>
-    <PackageId>$(PackagePrefix).Validation</PackageId>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+     <PackageId>$(PackagePrefix).Validation</PackageId>
+    <TargetFrameworks>netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

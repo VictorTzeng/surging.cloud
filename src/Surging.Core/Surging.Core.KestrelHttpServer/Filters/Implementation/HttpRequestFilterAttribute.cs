@@ -54,10 +54,15 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
             else
             {
                 var path = HttpUtility.UrlDecode(GetRoutePath(filterContext.Context.Request.Path.ToString()));
-                var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrPathRegex(path);
+                var serviceRoute = await _serviceRouteProvider.GetRouteByPathOrRegexPath(path);
                 if (serviceRoute == null)
                 {
-                    serviceRoute = await _serviceRouteProvider.GetRouteByPathOrPathRegex(filterContext.Message.RoutePath);
+                    serviceRoute = await _serviceRouteProvider.GetRouteByPathOrRegexPath(filterContext.Message.RoutePath);
+
+                    if (serviceRoute == null) 
+                    {
+                        throw new CPlatformException("Routing path not found", StatusCode.Http404EndpointStatusCode);
+                    }
                 }
 
                 var httpMethods = serviceRoute.ServiceDescriptor.HttpMethod();

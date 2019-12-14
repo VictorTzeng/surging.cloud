@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>$(PackagePrefix).Swagger</PackageId>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFrameworks>netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

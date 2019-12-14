@@ -5,8 +5,10 @@ using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.Dapper.Expressions;
 using Surging.Core.Dapper.Filters.Action;
+using Surging.Core.Dapper.Filters.Elastic;
 using Surging.Core.Dapper.Filters.Query;
 using Surging.Core.Domain.Entities;
+using Surging.Core.Domain.PagedAndSorted;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -22,6 +24,14 @@ namespace Surging.Core.Dapper.Repositories
         private readonly IAuditActionFilter<TEntity, TPrimaryKey> _creationActionFilter;
         private readonly IAuditActionFilter<TEntity, TPrimaryKey> _modificationActionFilter;
         private readonly IAuditActionFilter<TEntity, TPrimaryKey> _deletionAuditDapperActionFilter;
+
+        private readonly IElasticFilter<TEntity, TPrimaryKey> _creationElasitcFilter;
+        private readonly IElasticFilter<TEntity, TPrimaryKey> _modificationElasitcFilter;
+        private readonly IElasticFilter<TEntity, TPrimaryKey> _deletionElasitcFilter;
+
+        protected readonly bool isUserSearchElasitcModule = false;
+        private readonly bool _elasiticClient;
+
         private readonly ILogger<DapperRepository<TEntity, TPrimaryKey>> _logger;
         public DapperRepository(ISoftDeleteQueryFilter softDeleteQueryFilter,
             ILogger<DapperRepository<TEntity, TPrimaryKey>> logger)
@@ -31,6 +41,14 @@ namespace Surging.Core.Dapper.Repositories
             _creationActionFilter = ServiceLocator.GetService<IAuditActionFilter<TEntity, TPrimaryKey>>(typeof(CreationAuditDapperActionFilter<TEntity, TPrimaryKey>).Name);
             _modificationActionFilter = ServiceLocator.GetService<IAuditActionFilter<TEntity, TPrimaryKey>>(typeof(ModificationAuditDapperActionFilter<TEntity, TPrimaryKey>).Name);
             _deletionAuditDapperActionFilter = ServiceLocator.GetService<IAuditActionFilter<TEntity, TPrimaryKey>>(typeof(DeletionAuditDapperActionFilter<TEntity, TPrimaryKey>).Name);
+
+            isUserSearchElasitcModule = DbSetting.Instance.UseElasicSearchModule;
+            if (isUserSearchElasitcModule)
+            {
+                _creationElasitcFilter = ServiceLocator.GetService<IElasticFilter<TEntity, TPrimaryKey>>(typeof(CreationElasticFilter<TEntity, TPrimaryKey>).Name);
+                _modificationElasitcFilter = ServiceLocator.GetService<IElasticFilter<TEntity, TPrimaryKey>>(typeof(ModificationElasticFilter<TEntity, TPrimaryKey>).Name);
+                _deletionElasitcFilter = ServiceLocator.GetService<IElasticFilter<TEntity, TPrimaryKey>>(typeof(DeletionElasticFilter<TEntity, TPrimaryKey>).Name);
+            }
         }
 
         public Task InsertAsync(TEntity entity)
@@ -39,11 +57,25 @@ namespace Surging.Core.Dapper.Repositories
             {
                 using (var conn = GetDbConnection())
                 {
-                    _creationActionFilter.ExecuteFilter(entity);
+                    conn.Open();
+                    using (var trans = conn.BeginTransaction())
+                    {
+                        _creationActionFilter.ExecuteFilter(entity);
 
-                    conn.Insert<TEntity>(entity);
-                    return Task.CompletedTask;
+                        conn.Insert<TEntity>(entity, trans);
+                        if (isUserSearchElasitcModule)
+                        {
+                            if (!_creationElasitcFilter.ExecuteFilter(entity))
+                            {
+                                trans.Rollback();
+                                throw new DataAccessException("elasticsearch server error", _creationElasitcFilter.ElasticException);
+                            }
+                        }
+                        trans.Commit();
+                        return Task.CompletedTask;
+                    }
                 }
+
             }
             catch (Exception ex)
             {
@@ -64,10 +96,23 @@ namespace Surging.Core.Dapper.Repositories
             {
                 using (var conn = GetDbConnection())
                 {
+                    conn.Open();
+                    using (var trans = conn.BeginTransaction())
+                    {
 
-                    _creationActionFilter.ExecuteFilter(entity);
-                    conn.Insert(entity);
-                    return Task.FromResult(entity.Id);
+                        _creationActionFilter.ExecuteFilter(entity);
+                        conn.Insert(entity,trans);
+                        if (isUserSearchElasitcModule)
+                        {
+                            if (!_creationElasitcFilter.ExecuteFilter(entity))
+                            {
+                                trans.Rollback();
+                                throw new DataAccessException("elasticsearch server error", _creationElasitcFilter.ElasticException);
+                            }
+                        }
+                        trans.Commit();
+                        return Task.FromResult(entity.Id);
+                    }
                 }
             }
             catch (Exception ex)
@@ -159,15 +204,27 @@ namespace Surging.Core.Dapper.Repositories
             {
                 using (var conn = GetDbConnection())
                 {
-                    if (entity is ISoftDelete)
+                    conn.Open();
+                    using (var trans = conn.BeginTransaction())
                     {
-                        _deletionAuditDapperActionFilter.ExecuteFilter(entity);
-                        UpdateAsync(entity);
-                    }
-                    else
-                    {
-                        conn.Delete(entity);
-
+                        if (entity is ISoftDelete)
+                        {
+                            _deletionAuditDapperActionFilter.ExecuteFilter(entity);
+                            UpdateAsync(entity, conn, trans);
+                        }
+                        else
+                        {
+                            conn.Delete(entity,trans);
+                        }
+                        if (isUserSearchElasitcModule)
+                        {
+                            if (!_deletionElasitcFilter.ExecuteFilter(entity))
+                            {
+                                trans.Rollback();
+                                throw new DataAccessException("elasticsearch server error", _deletionElasitcFilter.ElasticException);
+                            }
+                        }
+                        trans.Commit();
                     }
                     return Task.CompletedTask;
                 }
@@ -187,10 +244,19 @@ namespace Surging.Core.Dapper.Repositories
         public async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate)
         {
             IEnumerable<TEntity> items = await GetAllAsync(predicate);
-            foreach (TEntity entity in items)
+            using (var conn = GetDbConnection())
             {
-                await DeleteAsync(entity);
+                conn.Open();
+                using (var trans = conn.BeginTransaction()) 
+                {
+                    foreach (TEntity entity in items)
+                    {
+                        await DeleteAsync(entity,conn,trans);
+                    }
+                    trans.Commit();
+                }
             }
+            
 
         }
 
@@ -200,9 +266,22 @@ namespace Surging.Core.Dapper.Repositories
             {
                 using (var conn = GetDbConnection())
                 {
-                    _modificationActionFilter.ExecuteFilter(entity);
-                    conn.Update(entity);
-                    return Task.CompletedTask;
+                    conn.Open();
+                    using (var trans = conn.BeginTransaction())
+                    {
+                        _modificationActionFilter.ExecuteFilter(entity);
+                        conn.Update(entity,trans);
+                        if (isUserSearchElasitcModule)
+                        {
+                            if (!_modificationElasitcFilter.ExecuteFilter(entity))
+                            {
+                                trans.Rollback();
+                                throw new DataAccessException("elasticsearch server error", _modificationElasitcFilter.ElasticException);
+                            }
+                        }
+                        trans.Commit();
+                        return Task.CompletedTask;
+                    }
                 }
             }
             catch (Exception ex)
@@ -417,6 +496,14 @@ namespace Surging.Core.Dapper.Repositories
             {
                 _creationActionFilter.ExecuteFilter(entity);
                 conn.Insert<TEntity>(entity, trans);
+                if (isUserSearchElasitcModule)
+                {
+                    if (!_creationElasitcFilter.ExecuteFilter(entity))
+                    {
+                        trans.Rollback();
+                        throw new DataAccessException("elasticsearch server error", _creationElasitcFilter.ElasticException);
+                    }
+                }
                 return Task.CompletedTask;
             }
             catch (Exception ex)
@@ -437,6 +524,14 @@ namespace Surging.Core.Dapper.Repositories
             {
                 _creationActionFilter.ExecuteFilter(entity);
                 conn.Insert<TEntity>(entity, trans);
+                if (isUserSearchElasitcModule)
+                {
+                    if (!_creationElasitcFilter.ExecuteFilter(entity))
+                    {
+                        trans.Rollback();
+                        throw new DataAccessException("elasticsearch server error", _creationElasitcFilter.ElasticException);
+                    }
+                }
                 return Task.FromResult(entity.Id);
             }
             catch (Exception ex)
@@ -532,6 +627,14 @@ namespace Surging.Core.Dapper.Repositories
             {
                 _modificationActionFilter.ExecuteFilter(entity);
                 conn.Update(entity, trans);
+                if (isUserSearchElasitcModule)
+                {
+                    if (!_modificationElasitcFilter.ExecuteFilter(entity))
+                    {
+                        trans.Rollback();
+                        throw new DataAccessException("elasticsearch server error", _modificationElasitcFilter.ElasticException);
+                    }
+                }
                 return Task.CompletedTask;
 
             }
@@ -561,8 +664,16 @@ namespace Surging.Core.Dapper.Repositories
                 else
                 {
                     conn.Delete(entity, trans);
-
                 }
+                if (isUserSearchElasitcModule)
+                {
+                    if (!_deletionElasitcFilter.ExecuteFilter(entity))
+                    {
+                        trans.Rollback();
+                        throw new DataAccessException("elasticsearch server error", _deletionElasitcFilter.ElasticException);
+                    }
+                }
+               
                 return Task.CompletedTask;
 
             }
@@ -671,13 +782,13 @@ namespace Surging.Core.Dapper.Repositories
                         sorts.Add(new Sort()
                         {
                             PropertyName = "Id",
-                            Ascending = true
+                            Ascending = false
                         });
                     }
-                   
+
                     predicate = _softDeleteQueryFilter.ExecuteFilter<TEntity, TPrimaryKey>(predicate);
                     var pg = predicate.ToPredicateGroup<TEntity, TPrimaryKey>();
-                    var pageList = conn.GetPage<TEntity>(pg, sorts, index - 1, count);
+                    var pageList = conn.GetPage<TEntity>(pg, sorts, index - 1, count).ToList();
                     var totalCount = conn.Count<TEntity>(pg);
                     return Task.FromResult(new Tuple<IEnumerable<TEntity>, int>(pageList, totalCount));
                 }
@@ -719,18 +830,20 @@ namespace Surging.Core.Dapper.Repositories
                             sorts.Add(sort);
                         };
                     }
-                    else {
+                    else
+                    {
                         var sort = new Sort()
                         {
                             PropertyName = "Id",
                             Ascending = true
                         };
+                        sorts.Add(sort);
                     }
                     var predicate = _softDeleteQueryFilter.ExecuteFilter<TEntity, TPrimaryKey>();
                     var pg = predicate.ToPredicateGroup<TEntity, TPrimaryKey>();
-                    var pageList = conn.GetPage<TEntity>(pg, sorts, index - 1, count);
+                    var pageList = conn.GetPage<TEntity>(pg, sorts, index - 1, count).ToList();
                     var totalCount = conn.Count<TEntity>(pg);
-                    return Task.FromResult(new Tuple<IEnumerable<TEntity>,int>(pageList,totalCount));
+                    return Task.FromResult(new Tuple<IEnumerable<TEntity>, int>(pageList, totalCount));
                 }
             }
             catch (Exception ex)

@@ -43,6 +43,20 @@ namespace Surging.Core.Stage.Filters
             var gatewayAppConfig = AppConfig.Options.ApiGetWay;
             if (filterContext.Message.RoutePath == gatewayAppConfig.AuthenticationRoutePath)
             {
+                var terminal = filterContext.Context.Request.Headers["x-terminal"];
+                if (gatewayAppConfig.IsUsingTerminal) 
+                {                   
+                    if (!terminal.Any()) 
+                    {
+                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.RequestError, Message = "请设置请求头x-terminal" };
+                    }
+                    if (gatewayAppConfig.Terminals.Split(",").Any(p => p == terminal)) 
+                    {
+                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = StatusCode.RequestError, Message = $"不支持名称为{terminal}的终端,请检查设置的请求头x-terminal" };
+                    }
+                    //filterContext.Message.Parameters.Add("terminal", terminal);
+                    RpcContext.GetContext().SetAttachment("x-terminal", terminal.ToString());
+                }
                 var token = await _authorizationServerProvider.GenerateTokenCredential(new Dictionary<string, object>(filterContext.Message.Parameters));
                 if (token != null)
                 {

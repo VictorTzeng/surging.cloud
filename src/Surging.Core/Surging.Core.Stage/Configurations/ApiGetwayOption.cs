@@ -19,5 +19,9 @@ namespace Surging.Core.Stage.Configurations
         public int AccessTokenExpireTimeSpan { get; set; } = 30;
 
         public string TokenEndpointPath{ get; set; }
+
+        public bool IsUsingTerminal { get; set; } = false;
+
+        public string Terminals { get; set; } = string.Empty;
     }
 }

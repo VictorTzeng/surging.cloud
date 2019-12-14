@@ -58,7 +58,37 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
-        public ValueTask<ServiceRoute> GetLocalRouteByPathRegex(string path)
+        public ValueTask<ServiceRoute> GetLocalRouteByPath(string path)
+        {
+            var addess = NetUtils.GetHostAddress();
+
+            if (_localRoutes.Any())
+            {
+                _localRoutes.AddRange(_serviceEntryManager.GetEntries().Select(i =>
+                {
+                    i.Descriptor.Token = _serviceTokenGenerator.GetToken();
+                    return new ServiceRoute
+                    {
+                        Address = new[] { addess },
+                        ServiceDescriptor = i.Descriptor
+                    };
+                }).ToList());
+            }
+
+            path = path.ToLower();
+            _serviceRoute.TryGetValue(path, out ServiceRoute route);
+            if (route == null)
+            {
+                return new ValueTask<ServiceRoute>(GetRouteByRegexPathAsync(_localRoutes, path));
+            }
+            else
+            {
+                return new ValueTask<ServiceRoute>(route);
+            }
+
+        }
+
+        public ValueTask<ServiceRoute> GetLocalRouteByRegexPath(string path)
         {
             var addess = NetUtils.GetHostAddress();
 
@@ -79,7 +109,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             _serviceRoute.TryGetValue(path, out ServiceRoute route);
             if (route == null)
             {
-                return new ValueTask<ServiceRoute>(GetRouteByPathRegexAsync(_localRoutes, path));
+                return new ValueTask<ServiceRoute>(GetRouteByRegexPathAsync(_localRoutes, path));
             }
             else
             {
@@ -100,19 +130,39 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             }
         }
 
-        public async ValueTask<ServiceRoute> GetRouteByPathRegex(string path)
+        public async ValueTask<ServiceRoute> GetRouteByRegexPath(string path)
         {
             path = path.ToLower();
             _serviceRoute.TryGetValue(path, out ServiceRoute route);
             if (route == null)
             {
                 var routes = await _serviceRouteManager.GetRoutesAsync();
-                return await GetRouteByPathRegexAsync(routes, path);
+                return await GetRouteByRegexPathAsync(routes, path);
             }
             else
             {
                 return route;
             }
+        }
+
+        public async ValueTask<ServiceRoute> GetRouteByPathOrRegexPath(string path) 
+        {
+            var route = await GetRouteByPath(path);
+            if (route == null)
+            {
+                route = await GetRouteByRegexPath(path);
+            }
+            return route;
+        }
+
+        public async ValueTask<ServiceRoute> GetLocalRouteByPathOrRegexPath(string path) 
+        {
+            var route = await GetLocalRouteByPath(path);
+            if (route == null)
+            {
+                route = await GetLocalRouteByRegexPath(path);
+            }
+            return route;
         }
 
         public async Task<ServiceRoute> SearchRoute(string path)
@@ -135,16 +185,6 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                 };
             }).ToList();
             await _serviceRouteManager.SetRoutesAsync(addressDescriptors);
-        }
-
-        public async ValueTask<ServiceRoute> GetRouteByPathOrPathRegex(string path)
-        {
-            var route = await GetRouteByPath(path);
-            if (route == null) 
-            {
-                route = await GetRouteByPathRegex(path);
-            }
-            return route;
         }
 
         #region 私有方法
@@ -196,7 +236,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
-        private async Task<ServiceRoute> GetRouteByPathRegexAsync(IEnumerable<ServiceRoute> routes, string path)
+        private async Task<ServiceRoute> GetRouteByRegexPathAsync(IEnumerable<ServiceRoute> routes, string path)
         {
             var pattern = "/{.*?}";
 
@@ -214,8 +254,14 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                 if (_logger.IsEnabled(LogLevel.Warning))
                     _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
             }
-            else
-              if (!Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern)) _serviceRoute.GetOrAdd(path, route);
+            else 
+            {
+                if (Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern))
+                {
+                    _serviceRoute.GetOrAdd(path, route);
+                }
+            }
+            
             return route;
         }
 

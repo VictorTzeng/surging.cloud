@@ -9,8 +9,11 @@ namespace Surging.Core.Caching.Interfaces
 {
     public interface ICacheClient<T>
     {
-        T GetClient(CacheEndpoint info, int connectTimeout);
+        IServer GetServer(CacheEndpoint endpoint, int connectTimeout);
 
+        T GetClient(CacheEndpoint endpoint, int connectTimeout);
+
+      
         Task<bool> ConnectionAsync(CacheEndpoint endpoint, int connectTimeout);
 
     }

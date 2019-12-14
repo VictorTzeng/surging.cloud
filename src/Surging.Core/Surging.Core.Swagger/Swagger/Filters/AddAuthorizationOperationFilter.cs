@@ -21,6 +21,19 @@ namespace Surging.Core.Swagger.Swagger.Filters
                 operation.Parameters = new List<IParameter>();
             }
 
+            if (context.ServiceEntry.Descriptor.GetMetadata<bool>("IsTokenPoint")) 
+            {
+                operation.Parameters.Add(new BodyParameter
+                {
+                    Name = "x-terminal",
+                    In = "header",
+                    Required = false,
+                    Schema = new Schema
+                    {
+                        Type = "string"
+                    }
+                });
+            }
 
             var attribute =
                  context.ServiceEntry.Attributes.Where(p => p is AuthorizationAttribute)

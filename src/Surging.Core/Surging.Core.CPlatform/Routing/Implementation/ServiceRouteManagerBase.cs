@@ -87,7 +87,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         /// 获取所有可用的服务路由信息。
         /// </summary>
         /// <returns>服务路由集合。</returns>
-        public abstract Task<IEnumerable<ServiceRoute>> GetRoutesAsync();
+        public abstract Task<IEnumerable<ServiceRoute>> GetRoutesAsync(bool needUpdateFromServiceCenter = false);
 
         /// <summary>
         /// 设置服务路由。

@@ -11,7 +11,7 @@
         /// <summary>
         /// 平台架构异常
         /// </summary>
-        CPlatformError = 502,
+        CPlatformError = 602,
 
         /// <summary>
         /// 业务处理异常
@@ -26,19 +26,24 @@
         /// <summary>
         /// 数据访问错误
         /// </summary>
-        DataAccessError = 505,
+        DataAccessError = 705,
 
         /// <summary>
         /// 用户友好类异常
         /// </summary>
         UserFriendly = 506,
 
-        RegisterConnection = 507,
+        RegisterConnection = 707,
 
         /// <summary>
         /// 请求错误
         /// </summary>
-        RequestError = 508,
+        RequestError = 708,
+
+         /// <summary>
+        /// 服务不可用
+        /// </summary>
+        ServiceUnavailability = 709,
 
         /// <summary>
         /// 未被认证
@@ -52,15 +57,14 @@
 
         Http405EndpointStatusCode = 405,
 
-      
+        Http404EndpointStatusCode = 404,
+
+
         /// <summary>
         /// 未知错误
         /// </summary>
         UnKnownError = -1,
 
-        /// <summary>
-        /// 服务不可用
-        /// </summary>
-        ServiceUnavailability = 509,
+ 
     }
 }

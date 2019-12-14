@@ -1,4 +1,5 @@
 ﻿using Surging.Core.Domain.Entities;
+using Surging.Core.Domain.PagedAndSorted;
 using Surging.Core.Domain.Repositories;
 using System;
 using System.Collections.Generic;

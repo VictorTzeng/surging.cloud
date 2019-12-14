@@ -1,5 +1,7 @@
-﻿using Surging.Core.CPlatform.Utilities;
+﻿using Nest;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.Domain.Entities;
+using Surging.Core.ElasticSearch.Provider;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
@@ -11,6 +13,8 @@ namespace Surging.Core.Dapper.Filters.Action
     {
         protected const int Normal = 0;
         protected const int IsDeleted = 1;
+
+
         protected virtual void CheckAndSetId(object entityAsObj)
         {
             var entity1 = entityAsObj as IEntity<Guid>;

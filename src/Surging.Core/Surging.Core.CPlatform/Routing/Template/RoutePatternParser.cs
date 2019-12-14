@@ -8,7 +8,7 @@ namespace Surging.Core.CPlatform.Routing.Template
 {
     public class RoutePatternParser
     {
-        public static string Parse(string routeTemplet, string service, string method)
+        public static string Parse(string routeTemplet, string service, string method, bool routeIsReWriteByServiceRoute = false)
         {
             StringBuilder result = new StringBuilder();
             var parameters = routeTemplet.Split(@"/");
@@ -24,14 +24,14 @@ namespace Surging.Core.CPlatform.Routing.Template
                 {
                     result.Append(service.Substring(1, service.Length - param.Length - 1).ToLower());
                 }
-                else if ("Method".Equals(param, StringComparison.OrdinalIgnoreCase))
+                else if ("method".Equals(param, StringComparison.OrdinalIgnoreCase) && !routeIsReWriteByServiceRoute)
                 {
                     result.Append(method.ToLower());
                     isAppendMethod = true;
                 }
                 else
                 {
-                    if (!isAppendMethod)
+                    if (!isAppendMethod && !routeIsReWriteByServiceRoute)
                     {
                         result.AppendFormat("{0}/", method.ToLower());
                     }
@@ -41,7 +41,7 @@ namespace Surging.Core.CPlatform.Routing.Template
                 result.Append("/");
             }
             result.Length = result.Length - 1;
-            if (!isAppendMethod) result.AppendFormat("/{0}", method.ToLower());
+            if (!isAppendMethod && !routeIsReWriteByServiceRoute) result.AppendFormat("/{0}", method.ToLower());
             return result.ToString(); //result.ToString().ToLower();
         }
 

@@ -58,7 +58,16 @@ namespace Surging.Core.SwaggerGen
 
 
             var mapRoutePaths = Swagger.AppConfig.SwaggerConfig.Options?.MapRoutePaths;
-            var entries = _serviceEntryProvider.GetALLEntries();
+            var isOnlyGenerateLocalHostDocs = Swagger.AppConfig.SwaggerConfig.Options?.IsOnlyGenerateLocalHostDocs;
+            IEnumerable<ServiceEntry> entries;
+            if (isOnlyGenerateLocalHostDocs != null && isOnlyGenerateLocalHostDocs.Value)
+            {
+                entries = _serviceEntryProvider.GetEntries();
+            }
+            else {
+                entries = _serviceEntryProvider.GetALLEntries();
+            }
+
             if (mapRoutePaths != null)
             {
                 foreach (var path in mapRoutePaths)

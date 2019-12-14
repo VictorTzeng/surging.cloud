@@ -1,5 +1,7 @@
-﻿using Surging.Core.CPlatform.Address;
+﻿using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -19,11 +21,12 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         private readonly ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry> _dictionary =
             new ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry>();
         private readonly IServiceRouteManager _serviceRouteManager;
-        private readonly int _timeout = 30000;
+        private readonly int _timeout = AppConfig.ServerOptions.HealthCheckTimeout;
         private readonly Timer _timer;
         private EventHandler<HealthCheckEventArgs> _removed;
 
         private EventHandler<HealthCheckEventArgs> _changed;
+        private readonly ILogger<DefaultHealthCheckService> _logger;
 
         public event EventHandler<HealthCheckEventArgs> Removed
         {
@@ -43,16 +46,17 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         /// <param name="serviceRouteManager"></param>
         public DefaultHealthCheckService(IServiceRouteManager serviceRouteManager)
         {
-            var timeSpan = TimeSpan.FromSeconds(10);
+            _logger = ServiceLocator.GetService<ILogger<DefaultHealthCheckService>>();
+            var timeSpan = TimeSpan.FromSeconds(30);
 
             _serviceRouteManager = serviceRouteManager;
             //建立计时器
             _timer = new Timer(async s =>
             {
                 //检查服务是否可用
-                await Check(_dictionary.ToArray().Select(i => i.Value), _timeout);
+                Check(_dictionary.ToArray().Select(i => i.Value), _timeout);
                 //移除不可用的服务地址
-                RemoveUnhealthyAddress(_dictionary.ToArray().Select(i => i.Value).Where(m => m.UnhealthyTimes >= 6));
+                RemoveUnhealthyAddress(_dictionary.ToArray().Select(i => i.Value).Where(m => m.UnhealthyTimes >= AppConfig.ServerOptions.UnhealthyTimes));
             }, null, timeSpan, timeSpan);
 
             //去除监控。
@@ -68,16 +72,23 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                     var ipAddress = address as IpAddressModel;
                     return new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port);
                 });
-                await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
+                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
             //重新监控。
             serviceRouteManager.Changed += async (s, e) =>
             {
-                var keys = e.Route.Address.Select(address => {
+                var keys = e.Route.Address.Select(address =>
+                {
                     var ipAddress = address as IpAddressModel;
                     return new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port);
                 });
-                await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
+                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
+                var oldKeys = e.OldRoute.Address.Select(address =>
+                {
+                    var ipAddress = address as IpAddressModel;
+                    return new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port);
+                });
+                Check(_dictionary.Where(i => oldKeys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
         }
 
@@ -92,7 +103,13 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         public void Monitor(AddressModel address)
         {
             var ipAddress = address as IpAddressModel;
-            _dictionary.GetOrAdd(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), k => new MonitorEntry(address));
+            _dictionary.TryGetValue(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out MonitorEntry monitorAddress);
+            if (monitorAddress == null)
+            {
+                _logger.LogDebug($"监控{address.ToString()}服务");
+                var isHealth = Check(address, _timeout);
+                _dictionary.GetOrAdd(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), k => new MonitorEntry(address, isHealth));
+            }
         }
 
         /// <summary>
@@ -104,8 +121,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         {
             var ipAddress = address as IpAddressModel;
             MonitorEntry entry;
-            var isHealth= !_dictionary.TryGetValue(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out entry) ? await  Check(address, _timeout) :entry.Health;
-            OnChanged(new HealthCheckEventArgs(address,isHealth));
+            var isHealth = !_dictionary.TryGetValue(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out entry) ? Check(address, _timeout) : entry.Health;
+            OnChanged(new HealthCheckEventArgs(address, isHealth));
             return isHealth;
         }
 
@@ -176,7 +193,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                     return new IpAddressModel(ipEndPoint.Address.ToString(), ipEndPoint.Port);
                 }).ToList();
                 _serviceRouteManager.RemveAddressAsync(addresses).Wait();
-                addresses.ForEach(p => {
+                addresses.ForEach(p =>
+                {
                     var ipAddress = p as IpAddressModel;
                     _dictionary.TryRemove(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out MonitorEntry value);
                 });
@@ -184,41 +202,56 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             }
         }
 
-        private static async Task<bool> Check(AddressModel address, int timeout)
+        private bool Check(AddressModel address, int timeout)
         {
-            bool isHealth = false;
-            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout = timeout })
-            {
-                try
-                {
-                    await socket.ConnectAsync(address.CreateEndPoint());
-                    isHealth = true;
-                }
-                catch
-                {
-
-                }
-                return isHealth;
-            }
+            //bool isHealth = false;
+            //using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout = timeout })
+            //{
+            //    try
+            //    {
+            //        await socket.ConnectAsync(address.CreateEndPoint());
+            //        isHealth = true;
+            //    }
+            //    catch
+            //    {
+            //        _logger.LogDebug($"地址为{address.ToString()}的服务当前不可用");
+            //    }
+            //}
+            //return isHealth;
+            var ipEndPoint = address.CreateEndPoint() as IPEndPoint;
+            return SocketCheck.TestConnection(ipEndPoint.Address, ipEndPoint.Port, timeout);
         }
 
-        private static async Task Check(IEnumerable<MonitorEntry> entrys, int timeout)
+        private void Check(IEnumerable<MonitorEntry> entrys, int timeout)
         {
             foreach (var entry in entrys)
             {
-                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout = timeout })
+                //using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout = timeout })
+                //{
+                //    try
+                //    {
+                //        await socket.ConnectAsync(entry.EndPoint);
+                //        entry.UnhealthyTimes = 0;
+                //        entry.Health = true;
+                //    }
+                //    catch
+                //    {
+                //        entry.UnhealthyTimes++;
+                //        entry.Health = false;
+                //        _logger.LogDebug($"地址为{entry.EndPoint.ToString()}的服务当前不可用,不健康的次数为:{entry.UnhealthyTimes}");
+                //    }
+                //}
+                var ipEndPoint = entry.EndPoint as IPEndPoint;
+                if (SocketCheck.TestConnection(ipEndPoint.Address, ipEndPoint.Port, timeout))
                 {
-                    try
-                    {
-                        await socket.ConnectAsync(entry.EndPoint);
-                        entry.UnhealthyTimes = 0;
-                        entry.Health = true;
-                    }
-                    catch
-                    {
-                        entry.UnhealthyTimes++;
-                        entry.Health = false;
-                    }
+                    entry.UnhealthyTimes = 0;
+                    entry.Health = true;
+                }
+                else
+                {
+                    entry.UnhealthyTimes++;
+                    entry.Health = false;
+                    _logger.LogDebug($"地址为{entry.EndPoint.ToString()}的服务当前不可用,不健康的次数为:{entry.UnhealthyTimes}");
                 }
             }
         }

@@ -107,7 +107,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 address.Add(addressModel);
             }
 
-            if (address.Count == 0)
+            if (!address.Any())
             {
                 if (_logger.IsEnabled(LogLevel.Warning))
                     _logger.LogWarning($"根据服务id：{serviceId}，找不到可用的地址。");

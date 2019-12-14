@@ -2,13 +2,9 @@
 
   <PropertyGroup>
     <PackageId>$(PackagePrefix).Domain</PackageId>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFrameworks>netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
     <Description>封装领域设计组件</Description>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />

@@ -38,7 +38,7 @@ namespace Surging.Core.Consul
             _consulClientFactory = consulClientFactory;
             _logger = logger;
             _manager = manager; 
-            EnterCaches().Wait();
+           EnterCaches().Wait();
         }
 
         public override async Task ClearAsync()

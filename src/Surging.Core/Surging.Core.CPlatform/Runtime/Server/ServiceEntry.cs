@@ -18,6 +18,11 @@ namespace Surging.Core.CPlatform.Runtime.Server
         public Type Type { get; set; }
         public string MethodName { get; set; }
         public List<Attribute> Attributes { get; set; }
+
+        public IDictionary<string, Type> ParamTypes { get; set; } = new Dictionary<string, Type>();
+
+        public IEnumerable<string> CacheKeys { get; set; } = new List<string>();
+
         /// <summary>
         /// 服务描述符。
         /// </summary>

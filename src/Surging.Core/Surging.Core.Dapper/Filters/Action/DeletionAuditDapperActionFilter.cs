@@ -1,6 +1,8 @@
-﻿using Surging.Core.CPlatform.Runtime.Session;
+﻿using Nest;
+using Surging.Core.CPlatform.Runtime.Session;
 using Surging.Core.Domain.Entities;
 using Surging.Core.Domain.Entities.Auditing;
+using Surging.Core.ElasticSearch;
 using System;
 
 namespace Surging.Core.Dapper.Filters.Action

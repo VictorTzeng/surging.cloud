@@ -8,12 +8,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.Consul.Internal.Cluster.HealthChecks.Implementation
 {
     public class DefaultHealthCheckService : IHealthCheckService,IDisposable
     {
-        private readonly int _timeout = 30000;
+        private readonly int _timeout = 1000;
         private readonly Timer _timer;
         private readonly ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry> _dictionary =
     new ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry>();
@@ -57,39 +58,38 @@ namespace Surging.Core.Consul.Internal.Cluster.HealthChecks.Implementation
 
         private static async Task<bool> Check(AddressModel address, int timeout)
         {
-            bool isHealth = false;
-            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout = timeout })
-            {
-                try
-                {
-                    await socket.ConnectAsync(address.CreateEndPoint());
-                    isHealth = true;
-                }
-                catch
-                {
-
-                }
-                return isHealth;
-            }
+            var ipEndpoint = address.CreateEndPoint() as IPEndPoint;
+            return SocketCheck.TestConnection(ipEndpoint.Address, ipEndpoint.Port, timeout);
         }
 
         private static async Task Check(IEnumerable<MonitorEntry> entrys, int timeout)
         {
             foreach (var entry in entrys)
             {
-                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout = timeout })
+                //using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout = timeout })
+                //{
+                //    try
+                //    {
+                //        await socket.ConnectAsync(entry.EndPoint);
+                //        entry.UnhealthyTimes = 0;
+                //        entry.Health = true;
+                //    }
+                //    catch
+                //    {
+                //        entry.UnhealthyTimes++;
+                //        entry.Health = false;
+                //    }
+                //}
+                var ipEndpoint = entry.EndPoint as IPEndPoint;
+                if (SocketCheck.TestConnection(ipEndpoint.Address, ipEndpoint.Port, timeout))
                 {
-                    try
-                    {
-                        await socket.ConnectAsync(entry.EndPoint);
-                        entry.UnhealthyTimes = 0;
-                        entry.Health = true;
-                    }
-                    catch
-                    {
-                        entry.UnhealthyTimes++;
-                        entry.Health = false;
-                    }
+                    entry.UnhealthyTimes = 0;
+                    entry.Health = true;
+                }
+                else 
+                {
+                    entry.UnhealthyTimes++;
+                    entry.Health = false;
                 }
             }
         }

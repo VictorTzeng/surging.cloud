@@ -68,9 +68,9 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         ///     获取所有可用的服务路由信息。
         /// </summary>
         /// <returns>服务路由集合。</returns>
-        public override async Task<IEnumerable<ServiceRoute>> GetRoutesAsync()
+        public override async Task<IEnumerable<ServiceRoute>> GetRoutesAsync(bool needUpdateFromServiceCenter = false)
         {
-            if (_routes == null)
+            if (_routes == null || !needUpdateFromServiceCenter)
                 await EntryRoutes(_filePath);
             return _routes;
         }
@@ -105,7 +105,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
         public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
         {
-            var routes = await GetRoutesAsync();
+            var routes = await GetRoutesAsync(true);
             foreach (var route in routes)
             {
                 route.Address = route.Address.Except(Address);

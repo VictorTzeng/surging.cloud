@@ -83,9 +83,9 @@ namespace Surging.Core.Consul
         /// 获取所有可用的服务路由信息。
         /// </summary>
         /// <returns>服务路由集合。</returns>
-        public override async Task<IEnumerable<ServiceRoute>> GetRoutesAsync()
+        public override async Task<IEnumerable<ServiceRoute>> GetRoutesAsync(bool needUpdateFromServiceCenter = false)
         {
-            await EnterRoutes();
+            await EnterRoutes(needUpdateFromServiceCenter);
             return _routes;
         }
 
@@ -125,13 +125,14 @@ namespace Surging.Core.Consul
 
         public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
         {
-            var routes = await GetRoutesAsync();
+            var routes = await GetRoutesAsync(true);
             try
             {
                 foreach (var route in routes)
                 {
                     route.Address = route.Address.Except(Address);
                 }
+                _logger.LogDebug($"地址为{Address.Select(p => p.ToString()).JoinAsString(",")}的服务当前不健康,将会从服务列表中移除");
             }
             catch (Exception ex)
             {
@@ -191,13 +192,14 @@ namespace Surging.Core.Consul
                     {
                         var distributedLock = await client.AcquireLock(key);
                         result.Add(distributedLock);
-                    } catch (Exception ex) {
-                        if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug)) {
-                            _logger.LogDebug($"新增consul lock:{key}失败",ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                        {
+                            _logger.LogDebug($"新增consul lock:{key}失败", ex);
                         }
                     }
-                   
-                  
                 }
                 else
                 {
@@ -212,13 +214,15 @@ namespace Surging.Core.Consul
                       default :
                        new CancellationTokenSource(TimeSpan.FromSeconds(_configInfo.LockDelay)).Token);
                         result.Add(distributedLock);
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
                         {
                             _logger.LogDebug($"新增consul lock:{key}失败", ex);
                         }
                     }
-                  
+
                 }
 
             }
@@ -305,9 +309,9 @@ namespace Surging.Core.Consul
             return client;
         }
 
-        private async Task EnterRoutes()
+        private async Task EnterRoutes(bool needUpdateFromServiceCenter = false)
         {
-            if (_routes != null && _routes.Length > 0 && !(await IsNeedUpdateRoutes(_routes.Length)))
+            if (_routes != null && _routes.Length > 0 && !(await IsNeedUpdateRoutes(_routes.Length)) && !needUpdateFromServiceCenter)
                 return;
             Action<string[]> action = null;
             var client = await GetConsulClient();
