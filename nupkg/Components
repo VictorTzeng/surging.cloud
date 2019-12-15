@@ -25,3 +25,4 @@ Surging.Core.Domain
 Surging.Core.Dapper
 Surging.Core.Validation
 Surging.Core.Stage
+Surging.Core.ElasticSearch
