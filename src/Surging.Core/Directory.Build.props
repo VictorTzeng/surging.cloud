@@ -11,7 +11,8 @@
 	  <Authors>Jingshonline</Authors>
     <Product>Surging Micro Service Framework</Product>
     <Copyright>Copyright © Jingshonline All Rights Reserved.</Copyright>
-	  <PackageTags>surging;microservice</PackageTags>
+	  <PackageTags>surging;surging.cloud;microservice</PackageTags>
+	   <PackagePrefix>Surging.Cloud</PackagePrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release' ">
