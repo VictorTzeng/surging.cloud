@@ -63,5 +63,5 @@ if($push) {
         Write-Warning -Message "未设置nuget仓库的APIKEY"
 		exit 1
 	}
-	dotnet nuget push *.nupkg -s $repo -k $apikey
+	dotnet nuget push *.nupkg -s $repo -k $apikey --skip-duplicate
 }
