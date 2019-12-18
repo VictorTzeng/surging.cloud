@@ -81,7 +81,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
                         {
                             continue;
                         }
-                        if (paramType.IsClass)
+                        if (paramType.IsAutoClass)
                         {
                             object parameterValue = null;
                             var runtimeProperties = paramType.GetRuntimeProperties();

@@ -164,7 +164,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 {
                     continue;
                 }
-                if (parameter.ParameterType.IsClass && flag ==0)
+                if (parameter.ParameterType.IsAutoClass && flag ==0)
                 {
                     var runtimeProperties = parameter.ParameterType.GetRuntimeProperties();
                     foreach (var runtimePropertie in runtimeProperties)
